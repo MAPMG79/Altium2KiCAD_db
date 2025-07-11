@@ -1,0 +1,120 @@
+# Footprint Mapping Rules for Altium to KiCAD Migration
+# This file defines rules for mapping Altium footprints to KiCAD footprints
+
+# Format:
+# altium_footprint_pattern: kicad_footprint
+# - Patterns can use * as a wildcard
+# - More specific patterns take precedence over general ones
+
+# Resistors
+"*RES*0402*": "Resistor_SMD:R_0402_1005Metric"
+"*RES*0603*": "Resistor_SMD:R_0603_1608Metric"
+"*RES*0805*": "Resistor_SMD:R_0805_2012Metric"
+"*RES*1206*": "Resistor_SMD:R_1206_3216Metric"
+"*RES*1210*": "Resistor_SMD:R_1210_3225Metric"
+"*RES*2010*": "Resistor_SMD:R_2010_5025Metric"
+"*RES*2512*": "Resistor_SMD:R_2512_6332Metric"
+"*RES*AXIAL*": "Resistor_THT:R_Axial_DIN0207_L6.3mm_D2.5mm_P10.16mm_Horizontal"
+"*RES*VERT*": "Resistor_THT:R_Axial_DIN0207_L6.3mm_D2.5mm_P2.54mm_Vertical"
+
+# Capacitors
+"*CAP*0402*": "Capacitor_SMD:C_0402_1005Metric"
+"*CAP*0603*": "Capacitor_SMD:C_0603_1608Metric"
+"*CAP*0805*": "Capacitor_SMD:C_0805_2012Metric"
+"*CAP*1206*": "Capacitor_SMD:C_1206_3216Metric"
+"*CAP*1210*": "Capacitor_SMD:C_1210_3225Metric"
+"*CAP*RADIAL*": "Capacitor_THT:CP_Radial_D5.0mm_P2.50mm"
+"*CAP*DISC*": "Capacitor_THT:C_Disc_D5.0mm_W2.5mm_P5.00mm"
+"*CAP*TANT*": "Capacitor_SMD:CP_EIA-3216-18_Kemet-A"
+
+# Inductors
+"*IND*0402*": "Inductor_SMD:L_0402_1005Metric"
+"*IND*0603*": "Inductor_SMD:L_0603_1608Metric"
+"*IND*0805*": "Inductor_SMD:L_0805_2012Metric"
+"*IND*1206*": "Inductor_SMD:L_1206_3216Metric"
+"*IND*RADIAL*": "Inductor_THT:L_Radial_D6.0mm_P2.50mm"
+
+# Diodes
+"*DIODE*SOD123*": "Diode_SMD:D_SOD-123"
+"*DIODE*SOD323*": "Diode_SMD:D_SOD-323"
+"*DIODE*DO214*": "Diode_SMD:D_SMA"
+"*DIODE*DO35*": "Diode_THT:D_DO-35_SOD27_P7.62mm_Horizontal"
+"*DIODE*DO41*": "Diode_THT:D_DO-41_SOD81_P10.16mm_Horizontal"
+
+# LEDs
+"*LED*0603*": "LED_SMD:LED_0603_1608Metric"
+"*LED*0805*": "LED_SMD:LED_0805_2012Metric"
+"*LED*1206*": "LED_SMD:LED_1206_3216Metric"
+"*LED*3MM*": "LED_THT:LED_D3.0mm"
+"*LED*5MM*": "LED_THT:LED_D5.0mm"
+
+# Transistors
+"*SOT23*": "Package_TO_SOT_SMD:SOT-23"
+"*SOT223*": "Package_TO_SOT_SMD:SOT-223"
+"*SOT89*": "Package_TO_SOT_SMD:SOT-89-3"
+"*TO92*": "Package_TO_SOT_THT:TO-92_Inline"
+"*TO220*": "Package_TO_SOT_THT:TO-220-3_Vertical"
+"*TO247*": "Package_TO_SOT_THT:TO-247-3_Vertical"
+
+# ICs
+"*SOIC*8*": "Package_SO:SOIC-8_3.9x4.9mm_P1.27mm"
+"*SOIC*14*": "Package_SO:SOIC-14_3.9x8.7mm_P1.27mm"
+"*SOIC*16*": "Package_SO:SOIC-16_3.9x9.9mm_P1.27mm"
+"*TSSOP*8*": "Package_SO:TSSOP-8_4.4x3mm_P0.65mm"
+"*TSSOP*14*": "Package_SO:TSSOP-14_4.4x5mm_P0.65mm"
+"*TSSOP*16*": "Package_SO:TSSOP-16_4.4x5mm_P0.65mm"
+"*QFP*32*": "Package_QFP:LQFP-32_7x7mm_P0.8mm"
+"*QFP*44*": "Package_QFP:LQFP-44_10x10mm_P0.8mm"
+"*QFP*64*": "Package_QFP:LQFP-64_10x10mm_P0.5mm"
+"*QFP*100*": "Package_QFP:LQFP-100_14x14mm_P0.5mm"
+"*QFN*16*": "Package_DFN_QFN:QFN-16-1EP_3x3mm_P0.5mm_EP1.7x1.7mm"
+"*QFN*24*": "Package_DFN_QFN:QFN-24-1EP_4x4mm_P0.5mm_EP2.7x2.7mm"
+"*QFN*32*": "Package_DFN_QFN:QFN-32-1EP_5x5mm_P0.5mm_EP3.45x3.45mm"
+"*DIP*8*": "Package_DIP:DIP-8_W7.62mm"
+"*DIP*14*": "Package_DIP:DIP-14_W7.62mm"
+"*DIP*16*": "Package_DIP:DIP-16_W7.62mm"
+"*DIP*28*": "Package_DIP:DIP-28_W7.62mm"
+
+# Connectors
+"*HEADER*1X2*": "Connector_PinHeader_2.54mm:PinHeader_1x02_P2.54mm_Vertical"
+"*HEADER*1X3*": "Connector_PinHeader_2.54mm:PinHeader_1x03_P2.54mm_Vertical"
+"*HEADER*1X4*": "Connector_PinHeader_2.54mm:PinHeader_1x04_P2.54mm_Vertical"
+"*HEADER*1X5*": "Connector_PinHeader_2.54mm:PinHeader_1x05_P2.54mm_Vertical"
+"*HEADER*2X2*": "Connector_PinHeader_2.54mm:PinHeader_2x02_P2.54mm_Vertical"
+"*HEADER*2X3*": "Connector_PinHeader_2.54mm:PinHeader_2x03_P2.54mm_Vertical"
+"*HEADER*2X4*": "Connector_PinHeader_2.54mm:PinHeader_2x04_P2.54mm_Vertical"
+"*HEADER*2X5*": "Connector_PinHeader_2.54mm:PinHeader_2x05_P2.54mm_Vertical"
+"*TERMINAL*2*": "TerminalBlock_Phoenix:TerminalBlock_Phoenix_PT-1,5-2-5.0-H_1x02_P5.00mm_Horizontal"
+"*TERMINAL*3*": "TerminalBlock_Phoenix:TerminalBlock_Phoenix_PT-1,5-3-5.0-H_1x03_P5.00mm_Horizontal"
+"*USB*MINI*": "Connector_USB:USB_Mini-B_Lumberg_2486_01_Horizontal"
+"*USB*MICRO*": "Connector_USB:USB_Micro-B_Molex-105017-0001"
+"*USB*TYPE*C*": "Connector_USB:USB_C_Receptacle_HRO_TYPE-C-31-M-12"
+"*DB9*": "Connector_Dsub:DSUB-9_Male_Horizontal_P2.77x2.84mm_EdgePinOffset9.90mm"
+"*DB15*": "Connector_Dsub:DSUB-15_Male_Horizontal_P2.77x2.84mm_EdgePinOffset9.90mm"
+"*DB25*": "Connector_Dsub:DSUB-25_Male_Horizontal_P2.77x2.84mm_EdgePinOffset9.90mm"
+
+# Switches
+"*SW*PUSH*": "Button_Switch_THT:SW_PUSH_6mm"
+"*SW*TOGGLE*": "Button_Switch_THT:SW_Toggle_SPDT_Angled"
+"*SW*DIP*4*": "Button_Switch_THT:SW_DIP_SPSTx04_Slide_9.78x12.34mm_W7.62mm_P2.54mm"
+"*SW*DIP*8*": "Button_Switch_THT:SW_DIP_SPSTx08_Slide_9.78x22.5mm_W7.62mm_P2.54mm"
+
+# Crystals and oscillators
+"*CRYSTAL*HC49*": "Crystal:Crystal_HC49-4H_Vertical"
+"*CRYSTAL*5X3*": "Crystal:Crystal_SMD_5032-2Pin_5.0x3.2mm"
+"*CRYSTAL*3X2*": "Crystal:Crystal_SMD_3225-4Pin_3.2x2.5mm"
+"*OSC*5X3*": "Oscillator:Oscillator_SMD_EuroQuartz_XO53-4Pin_5.0x3.2mm"
+
+# Fuses
+"*FUSE*1206*": "Fuse:Fuse_1206_3216Metric"
+"*FUSE*HOLDER*": "Fuse:Fuseholder_Cylinder-5x20mm_Schurter_0031_8201_Horizontal_Open"
+
+# Relays
+"*RELAY*5MM*": "Relay_THT:Relay_SPDT_Omron_G5V-1"
+"*RELAY*10MM*": "Relay_THT:Relay_SPDT_Omron_G5Q-1"
+
+# Transformers
+"*TRANSFORMER*": "Transformer_THT:Transformer_Toroid_Horizontal_Diameter14mm_Amidon-T50"
+
+# Default fallback (if no other rule matches)
+"*": "Package_SO:SOIC-16_3.9x9.9mm_P1.27mm"

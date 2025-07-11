@@ -1,0 +1,134 @@
+[build-system]
+requires = ["setuptools>=42", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "altium2kicad"
+version = "1.0.0"
+description = "A tool for migrating Altium database libraries to KiCAD format"
+readme = "README.md"
+requires-python = ">=3.7"
+license = {text = "MIT"}
+authors = [
+    {name = "Altium2KiCAD Team", email = "support@migration-tool.com"}
+]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Developers",
+    "Intended Audience :: Science/Research",
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.7",
+    "Programming Language :: Python :: 3.8",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Topic :: Scientific/Engineering :: Electronic Design Automation (EDA)",
+]
+dependencies = [
+    "configparser>=5.0.0",
+    "pyodbc>=4.0.30",
+    "pyyaml>=6.0",
+    "tqdm>=4.62.0",
+    "sqlalchemy>=1.4.0",
+    "click>=8.0.0",
+    "tkinter-tooltip>=0.2.0",
+    "requests>=2.25.0",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=6.0.0",
+    "pytest-cov>=2.12.0",
+    "black>=22.12.0",
+    "isort>=5.12.0",
+    "flake8>=6.0.0",
+    "flake8-docstrings>=1.6.0",
+    "mypy>=0.991",
+    "types-PyYAML",
+    "types-requests",
+    "pre-commit>=2.20.0",
+    "build>=0.8.0",
+    "twine>=4.0.0",
+]
+gui = [
+    "pillow>=9.0.0",
+    "customtkinter>=5.0.0",
+]
+ml = [
+    "scikit-learn>=1.0.0",
+    "numpy>=1.20.0",
+]
+
+[project.urls]
+"Homepage" = "https://github.com/your-org/altium-kicad-migration"
+"Bug Tracker" = "https://github.com/your-org/altium-kicad-migration/issues"
+"Documentation" = "https://altium-kicad-migration.readthedocs.io/"
+
+[project.scripts]
+altium2kicad = "migration_tool.cli:main"
+altium2kicad-gui = "migration_tool.gui:main"
+altium2kicad-api = "migration_tool.api:start_api_server"
+
+[tool.black]
+line-length = 88
+target-version = ['py37', 'py38', 'py39', 'py310']
+include = '\.pyi?$'
+exclude = '''
+/(
+    \.eggs
+  | \.git
+  | \.hg
+  | \.mypy_cache
+  | \.tox
+  | \.venv
+  | _build
+  | buck-out
+  | build
+  | dist
+)/
+'''
+
+[tool.isort]
+profile = "black"
+multi_line_output = 3
+
+[tool.mypy]
+python_version = "3.7"
+warn_return_any = true
+warn_unused_configs = true
+disallow_untyped_defs = true
+disallow_incomplete_defs = true
+
+[[tool.mypy.overrides]]
+module = "tests.*"
+disallow_untyped_defs = false
+disallow_incomplete_defs = false
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+python_files = "test_*.py"
+python_functions = "test_*"
+python_classes = "Test*"
+addopts = "--cov=migration_tool --cov-report=term-missing"
+
+[tool.coverage.run]
+source = ["migration_tool"]
+omit = [
+    "tests/*",
+    "setup.py",
+]
+
+[tool.coverage.report]
+exclude_lines = [
+    "pragma: no cover",
+    "def __repr__",
+    "if self.debug:",
+    "if settings.DEBUG",
+    "raise AssertionError",
+    "raise NotImplementedError",
+    "if 0:",
+    "if __name__ == .__main__.:",
+    "class .*\\bProtocol\\):",
+    "@(abc\\.)?abstractmethod",
+]

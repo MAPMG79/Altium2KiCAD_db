@@ -1,0 +1,59 @@
+# Default configuration for Altium to KiCAD Database Migration Tool
+
+# Logging configuration
+logging:
+  level: INFO  # DEBUG, INFO, WARNING, ERROR, CRITICAL
+  format: "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+  file: null  # Set to a path to enable file logging, null for console only
+
+# Database connection settings
+database:
+  # Connection timeout in seconds
+  timeout: 30
+  # Maximum number of retries for database operations
+  max_retries: 3
+  # Retry delay in seconds
+  retry_delay: 2
+
+# Migration settings
+migration:
+  # Create separate views for different component types
+  create_component_views: true
+  # Include confidence scores in the output
+  include_confidence_scores: true
+  # Validate symbol and footprint existence in KiCAD libraries
+  validate_symbols: false
+  # Maximum number of components to process in a batch
+  batch_size: 1000
+  # Minimum confidence score (0-100) to accept a mapping
+  min_confidence: 50
+
+# KiCAD output settings
+kicad:
+  # Default symbol library path (if not specified at runtime)
+  symbol_lib_path: ""
+  # Default footprint library path (if not specified at runtime)
+  footprint_lib_path: ""
+  # Database schema version
+  schema_version: "1.0"
+  # Default table name for components
+  component_table: "components"
+  # Default field names mapping
+  field_mapping:
+    # Altium field name: KiCAD field name
+    "Comment": "Description"
+    "Library Ref": "Symbol"
+    "Footprint Ref": "Footprint"
+    "Library Path": "SymbolLibrary"
+    "Footprint Path": "FootprintLibrary"
+    "Value": "Value"
+    "ComponentLink1URL": "Datasheet"
+
+# Mapping rules
+mapping:
+  # Symbol mapping rules file
+  symbol_rules: "config/symbol_mapping_rules.yaml"
+  # Footprint mapping rules file
+  footprint_rules: "config/footprint_mapping_rules.yaml"
+  # Category mapping rules file
+  category_rules: "config/category_mapping_rules.yaml"

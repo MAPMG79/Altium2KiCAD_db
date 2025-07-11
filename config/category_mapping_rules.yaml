@@ -1,0 +1,217 @@
+# Category Mapping Rules for Altium to KiCAD Migration
+# This file defines rules for categorizing components in KiCAD
+
+# Format:
+# - pattern: Pattern to match component name or description
+#   category: Category name to assign
+#   subcategory: Optional subcategory name
+#   keywords: Optional list of keywords to associate with the component
+
+# Resistors
+- pattern: "*RES*"
+  category: "Passive Components"
+  subcategory: "Resistors"
+  keywords: ["resistor", "resistance", "ohm"]
+
+- pattern: "R*"
+  category: "Passive Components"
+  subcategory: "Resistors"
+  keywords: ["resistor", "resistance", "ohm"]
+
+# Capacitors
+- pattern: "*CAP*"
+  category: "Passive Components"
+  subcategory: "Capacitors"
+  keywords: ["capacitor", "capacitance", "farad"]
+
+- pattern: "C*"
+  category: "Passive Components"
+  subcategory: "Capacitors"
+  keywords: ["capacitor", "capacitance", "farad"]
+
+# Inductors
+- pattern: "*IND*"
+  category: "Passive Components"
+  subcategory: "Inductors"
+  keywords: ["inductor", "inductance", "henry", "coil"]
+
+- pattern: "L*"
+  category: "Passive Components"
+  subcategory: "Inductors"
+  keywords: ["inductor", "inductance", "henry", "coil"]
+
+# Diodes
+- pattern: "*DIODE*"
+  category: "Semiconductor"
+  subcategory: "Diodes"
+  keywords: ["diode", "rectifier"]
+
+- pattern: "D*"
+  category: "Semiconductor"
+  subcategory: "Diodes"
+  keywords: ["diode", "rectifier"]
+
+# LEDs
+- pattern: "*LED*"
+  category: "Semiconductor"
+  subcategory: "LEDs"
+  keywords: ["led", "light emitting diode", "indicator"]
+
+# Transistors
+- pattern: "*TRANSISTOR*"
+  category: "Semiconductor"
+  subcategory: "Transistors"
+  keywords: ["transistor", "bjt", "fet", "mosfet"]
+
+- pattern: "*NPN*"
+  category: "Semiconductor"
+  subcategory: "Transistors"
+  keywords: ["transistor", "bjt", "npn"]
+
+- pattern: "*PNP*"
+  category: "Semiconductor"
+  subcategory: "Transistors"
+  keywords: ["transistor", "bjt", "pnp"]
+
+- pattern: "*FET*"
+  category: "Semiconductor"
+  subcategory: "Transistors"
+  keywords: ["transistor", "fet", "mosfet", "jfet"]
+
+- pattern: "*MOS*"
+  category: "Semiconductor"
+  subcategory: "Transistors"
+  keywords: ["transistor", "mosfet"]
+
+# Integrated Circuits
+- pattern: "*IC*"
+  category: "Integrated Circuits"
+  subcategory: "General"
+  keywords: ["ic", "integrated circuit", "chip"]
+
+- pattern: "*OPAMP*"
+  category: "Integrated Circuits"
+  subcategory: "Operational Amplifiers"
+  keywords: ["opamp", "operational amplifier", "amplifier"]
+
+- pattern: "*COMPARATOR*"
+  category: "Integrated Circuits"
+  subcategory: "Comparators"
+  keywords: ["comparator", "analog"]
+
+- pattern: "*TIMER*"
+  category: "Integrated Circuits"
+  subcategory: "Timers"
+  keywords: ["timer", "555", "oscillator"]
+
+- pattern: "*REGULATOR*"
+  category: "Integrated Circuits"
+  subcategory: "Voltage Regulators"
+  keywords: ["regulator", "voltage regulator", "ldo"]
+
+- pattern: "*MCU*"
+  category: "Integrated Circuits"
+  subcategory: "Microcontrollers"
+  keywords: ["mcu", "microcontroller", "processor"]
+
+- pattern: "*MICRO*"
+  category: "Integrated Circuits"
+  subcategory: "Microcontrollers"
+  keywords: ["mcu", "microcontroller", "processor"]
+
+- pattern: "*LOGIC*"
+  category: "Integrated Circuits"
+  subcategory: "Logic"
+  keywords: ["logic", "gate", "buffer", "flip-flop"]
+
+# Connectors
+- pattern: "*CONN*"
+  category: "Connectors"
+  subcategory: "General"
+  keywords: ["connector", "terminal", "header"]
+
+- pattern: "*HEADER*"
+  category: "Connectors"
+  subcategory: "Headers"
+  keywords: ["header", "pin header", "connector"]
+
+- pattern: "*TERMINAL*"
+  category: "Connectors"
+  subcategory: "Terminal Blocks"
+  keywords: ["terminal", "terminal block", "screw terminal"]
+
+- pattern: "*USB*"
+  category: "Connectors"
+  subcategory: "USB"
+  keywords: ["usb", "connector", "interface"]
+
+- pattern: "*DB*"
+  category: "Connectors"
+  subcategory: "D-Sub"
+  keywords: ["dsub", "db9", "db15", "db25", "serial"]
+
+# Switches
+- pattern: "*SWITCH*"
+  category: "Electromechanical"
+  subcategory: "Switches"
+  keywords: ["switch", "button", "toggle"]
+
+- pattern: "*SW*"
+  category: "Electromechanical"
+  subcategory: "Switches"
+  keywords: ["switch", "button", "toggle"]
+
+- pattern: "*BUTTON*"
+  category: "Electromechanical"
+  subcategory: "Switches"
+  keywords: ["button", "switch", "tactile"]
+
+# Crystals and oscillators
+- pattern: "*CRYSTAL*"
+  category: "Frequency Control"
+  subcategory: "Crystals"
+  keywords: ["crystal", "resonator", "frequency"]
+
+- pattern: "*XTAL*"
+  category: "Frequency Control"
+  subcategory: "Crystals"
+  keywords: ["crystal", "resonator", "frequency"]
+
+- pattern: "*OSC*"
+  category: "Frequency Control"
+  subcategory: "Oscillators"
+  keywords: ["oscillator", "clock", "frequency"]
+
+# Fuses
+- pattern: "*FUSE*"
+  category: "Protection"
+  subcategory: "Fuses"
+  keywords: ["fuse", "protection", "current"]
+
+- pattern: "*PTC*"
+  category: "Protection"
+  subcategory: "Resettable Fuses"
+  keywords: ["ptc", "fuse", "resettable", "protection"]
+
+# Relays
+- pattern: "*RELAY*"
+  category: "Electromechanical"
+  subcategory: "Relays"
+  keywords: ["relay", "switch", "electromagnetic"]
+
+# Transformers
+- pattern: "*TRANSFORMER*"
+  category: "Magnetic"
+  subcategory: "Transformers"
+  keywords: ["transformer", "magnetic", "inductor"]
+
+- pattern: "*XFMR*"
+  category: "Magnetic"
+  subcategory: "Transformers"
+  keywords: ["transformer", "magnetic", "inductor"]
+
+# Default category for unmatched components
+- pattern: "*"
+  category: "Uncategorized"
+  subcategory: "General"
+  keywords: ["component"]

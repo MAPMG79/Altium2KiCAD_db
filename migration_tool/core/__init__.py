@@ -1,0 +1,1 @@
+"""Core functionality for the Altium to KiCAD migration tool."""

@@ -1,0 +1,100 @@
+# Symbol Mapping Rules for Altium to KiCAD Migration
+# This file defines rules for mapping Altium symbols to KiCAD symbols
+
+# Format:
+# altium_symbol_pattern: kicad_symbol
+# - Patterns can use * as a wildcard
+# - More specific patterns take precedence over general ones
+
+# Resistors
+"RES*": "Device:R"
+"R*": "Device:R"
+"*Resistor*": "Device:R"
+"*Res*": "Device:R"
+
+# Capacitors
+"CAP*": "Device:C"
+"C*": "Device:C"
+"*Capacitor*": "Device:C"
+"*Cap*": "Device:C"
+
+# Polarized Capacitors
+"*CAP_POL*": "Device:CP"
+"*Polarized*Cap*": "Device:CP"
+"*Electrolytic*": "Device:CP"
+
+# Inductors
+"IND*": "Device:L"
+"L*": "Device:L"
+"*Inductor*": "Device:L"
+
+# Diodes
+"DIODE*": "Device:D"
+"D*": "Device:D"
+"*Diode*": "Device:D"
+
+# LEDs
+"LED*": "Device:LED"
+"*LED*": "Device:LED"
+
+# Transistors
+"*NPN*": "Device:Q_NPN"
+"*PNP*": "Device:Q_PNP"
+"*NMOS*": "Device:Q_NMOS"
+"*PMOS*": "Device:Q_PMOS"
+"*FET*N*": "Device:Q_NMOS"
+"*FET*P*": "Device:Q_PMOS"
+"*Transistor*N*": "Device:Q_NPN"
+"*Transistor*P*": "Device:Q_PNP"
+
+# ICs
+"*OPAMP*": "Amplifier_Operational:LM741"
+"*OP_AMP*": "Amplifier_Operational:LM741"
+"*Operational Amplifier*": "Amplifier_Operational:LM741"
+"*Comparator*": "Comparator:LM339"
+"*555*": "Timer:NE555"
+"*Timer*": "Timer:NE555"
+"*Regulator*": "Regulator_Linear:LM7805_TO220"
+"*MCU*": "MCU_Microchip_PIC16:PIC16F877A-IP"
+"*Microcontroller*": "MCU_Microchip_PIC16:PIC16F877A-IP"
+
+# Connectors
+"*CONN*": "Connector:Conn_01x02_Pin"
+"*Connector*": "Connector:Conn_01x02_Pin"
+"*Header*": "Connector:Conn_01x02_Pin"
+"*Terminal*": "Connector:Conn_01x02_Pin"
+
+# Power symbols
+"*VCC*": "power:VCC"
+"*GND*": "power:GND"
+"*+5V*": "power:+5V"
+"*+3V3*": "power:+3.3V"
+"*+12V*": "power:+12V"
+"*-12V*": "power:-12V"
+
+# Switches
+"*Switch*": "Switch:SW_Push"
+"*SW*": "Switch:SW_Push"
+"*Button*": "Switch:SW_Push"
+"*Toggle*": "Switch:SW_SPDT"
+
+# Crystals and oscillators
+"*Crystal*": "Device:Crystal"
+"*XTAL*": "Device:Crystal"
+"*Oscillator*": "Oscillator:OCXO-14"
+"*OSC*": "Oscillator:OCXO-14"
+
+# Fuses
+"*Fuse*": "Device:Fuse"
+"*PTC*": "Device:Polyfuse"
+
+# Relays
+"*Relay*": "Relay:FINDER-36.11"
+"*RLY*": "Relay:FINDER-36.11"
+
+# Transformers
+"*Transformer*": "Device:Transformer"
+"*XFMR*": "Device:Transformer"
+
+# Default fallback (if no other rule matches)
+"*": "Device:Unknown"

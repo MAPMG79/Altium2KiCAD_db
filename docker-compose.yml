@@ -1,0 +1,84 @@
+version: '3.8'
+
+services:
+  migration-tool:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: altium2kicad:latest
+    container_name: altium2kicad
+    volumes:
+      - ./data:/app/data
+      - ./config:/app/config
+      - ./logs:/app/logs
+    ports:
+      - "8080:8080"  # For GUI if applicable
+    environment:
+      - LOG_LEVEL=INFO
+      - CONFIG_PATH=/app/config/default_config.yaml
+    command: ["--config", "/app/config/default_config.yaml"]
+    restart: unless-stopped
+
+  # Development service with mounted source code for live development
+  dev:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: altium2kicad:dev
+    container_name: altium2kicad-dev
+    volumes:
+      - .:/app
+    ports:
+      - "8081:8080"  # Different port to avoid conflicts with main service
+    environment:
+      - LOG_LEVEL=DEBUG
+      - CONFIG_PATH=/app/config/default_config.yaml
+      - PYTHONPATH=/app
+    command: ["--config", "/app/config/default_config.yaml", "--debug"]
+    restart: "no"
+
+  # Service for running tests
+  test:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: altium2kicad:test
+    container_name: altium2kicad-test
+    volumes:
+      - .:/app
+    environment:
+      - PYTHONPATH=/app
+      - LOG_LEVEL=DEBUG
+    command: ["pytest", "-xvs", "tests/"]
+    restart: "no"
+
+  # Service for generating sample data
+  sample-data:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: altium2kicad:sample-data
+    container_name: altium2kicad-sample-data
+    volumes:
+      - ./sample_data:/app/sample_data
+    environment:
+      - PYTHONPATH=/app
+    entrypoint: ["python", "scripts/generate_sample_data.py"]
+    command: ["--output-dir", "/app/sample_data", "--test-cases"]
+    restart: "no"
+
+  # Service for running performance benchmarks
+  benchmark:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: altium2kicad:benchmark
+    container_name: altium2kicad-benchmark
+    volumes:
+      - ./sample_data:/app/sample_data
+      - ./benchmark_results:/app/benchmark_results
+    environment:
+      - PYTHONPATH=/app
+    entrypoint: ["python", "scripts/performance_benchmark.py"]
+    command: ["--input-dir", "/app/sample_data", "--output-dir", "/app/benchmark_results"]
+    restart: "no"

@@ -1,0 +1,1 @@
+# Tests package for Altium to KiCAD Database Migration Tool
