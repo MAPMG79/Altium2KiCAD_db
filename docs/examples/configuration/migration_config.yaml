@@ -1,0 +1,40 @@
+# Basic Migration Configuration Example
+# This configuration file demonstrates the essential settings for a typical migration
+
+# Input and output paths
+altium_dblib_path: "input/components.DbLib"
+output_directory: "output/"
+
+# Performance settings
+enable_parallel_processing: true
+max_worker_threads: 4
+batch_size: 1000
+enable_caching: true
+
+# Mapping behavior
+fuzzy_threshold: 0.7
+confidence_threshold: 0.5
+
+# Validation and output options
+validate_symbols: true
+create_views: true
+vacuum_database: true
+
+# Logging configuration
+logging:
+  level: INFO
+  format: "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+  file: "logs/migration.log"
+
+# Database connection settings
+database:
+  timeout: 30
+  max_retries: 3
+  retry_delay: 2
+
+# KiCAD output settings
+kicad:
+  symbol_lib_path: "libraries/symbols"
+  footprint_lib_path: "libraries/footprints"
+  schema_version: "1.0"
+  component_table: "components"

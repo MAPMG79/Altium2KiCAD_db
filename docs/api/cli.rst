@@ -1,147 +1,252 @@
-Command Line Interface API
-========================
+Command Line Interface (CLI)
+===========================
 
-This section provides detailed API documentation for the command-line interface of the Altium to KiCAD Database Migration Tool.
+The Altium to KiCAD Database Migration Tool provides a comprehensive command-line interface for performing migrations and related operations without a graphical user interface.
 
-CLI Module
----------
-
-.. automodule:: migration_tool.cli
-   :members:
-   :undoc-members:
-   :show-inheritance:
-
-Command Line Arguments
---------------------
-
-The command-line interface provides the following arguments:
-
-.. code-block:: text
-
-   usage: altium2kicad [-h] [--version] [--input INPUT] [--output OUTPUT]
-                      [--library-name LIBRARY_NAME] [--config CONFIG]
-                      [--custom-rules CUSTOM_RULES] [--confidence-threshold THRESHOLD]
-                      [--validate-symbols] [--validate-footprints]
-                      [--parallel-processing] [--max-workers MAX_WORKERS]
-                      [--batch-size BATCH_SIZE] [--cache-results]
-                      [--cache-path CACHE_PATH] [--log-level {DEBUG,INFO,WARNING,ERROR,CRITICAL}]
-                      [--log-file LOG_FILE] [--verbose] [--gui] [--analyze]
-                      [--test-connection] [--component-limit COMPONENT_LIMIT]
-                      [--component-filter COMPONENT_FILTER] [--generate-mapping-report]
-                      [--validate-output VALIDATE_OUTPUT] [--batch-config BATCH_CONFIG]
-                      [--resume-from-checkpoint] [--clean-output] [--force-regenerate]
-                      [--diagnostic-report]
-
-Arguments
+Overview
 --------
 
-General Arguments
-~~~~~~~~~~~~~~~
+The CLI provides several commands for different operations:
 
-``--help, -h``
-  Show the help message and exit
+* ``migrate``: Migrate Altium database to KiCAD format
+* ``validate``: Validate existing migration results
+* ``test-connection``: Test connection to Altium database
+* ``generate-sample``: Generate sample data for testing
+* ``info``: Show information about Altium database
 
-``--version``
-  Show the version number and exit
+The CLI is implemented through the ``MigrationCLI`` class, which handles command-line arguments, logging, and execution of the appropriate operations.
 
-``--gui``
-  Launch the graphical user interface
+Basic Usage
+----------
 
-Input Arguments
-~~~~~~~~~~~~~
+.. code-block:: bash
 
-``--input INPUT``
-  Path to the Altium DbLib file or database connection string
+   # Basic migration
+   python run_cli.py migrate input.DbLib -o output_dir
+   
+   # Migration with custom settings
+   python run_cli.py migrate input.DbLib -o output_dir --parallel --cache --fuzzy-threshold 0.8
+   
+   # Validate existing migration
+   python run_cli.py validate output_dir/components.db original_data.json
+   
+   # Test database connection
+   python run_cli.py test-connection input.DbLib
+   
+   # Generate sample data for testing
+   python run_cli.py generate-sample sample_output
 
-``--config CONFIG``
-  Path to the configuration file
+CLI Architecture
+---------------
 
-``--custom-rules CUSTOM_RULES``
-  Path to the custom mapping rules file
+The CLI is built using Python's ``argparse`` module and follows a command-subcommand pattern. Each subcommand has its own set of arguments and options.
 
-Output Arguments
+MigrationCLI Class
+-----------------
+
+.. code-block:: python
+
+   class MigrationCLI:
+       """Command Line Interface for migration operations"""
+       
+       def __init__(self):
+           self.logger = self._setup_logging()
+           self.config_manager = None
+
+The ``MigrationCLI`` class is the main entry point for the CLI. It handles:
+
+* Setting up logging
+* Parsing command-line arguments
+* Loading and validating configuration
+* Executing the appropriate command
+* Handling errors and generating reports
+
+Methods
+~~~~~~~
+
+setup_logging
+^^^^^^^^^^^^^
+
+.. code-block:: python
+
+   def _setup_logging(self, level: str = "INFO") -> logging.Logger:
+       """Setup logging configuration"""
+
+Sets up logging with appropriate handlers and log level.
+
+**Parameters:**
+
+* ``level``: Logging level (DEBUG, INFO, WARNING, ERROR)
+
+**Returns:**
+
+* Logger instance
+
+create_parser
+^^^^^^^^^^^^
+
+.. code-block:: python
+
+   def create_parser(self) -> argparse.ArgumentParser:
+       """Create command line argument parser"""
+
+Creates and configures the argument parser for the CLI.
+
+**Returns:**
+
+* Configured ArgumentParser instance
+
+run
+^^^
+
+.. code-block:: python
+
+   def run(self, args: Optional[list] = None) -> int:
+       """Main entry point for CLI"""
+
+Main entry point for the CLI. Parses arguments and executes the appropriate command.
+
+**Parameters:**
+
+* ``args``: Optional list of command-line arguments (if None, uses sys.argv)
+
+**Returns:**
+
+* Exit code (0 for success, non-zero for errors)
+
+Commands
+--------
+
+migrate
+~~~~~~~
+
+Migrates an Altium database to KiCAD format.
+
+**Arguments:**
+
+* ``input``: Path to Altium .DbLib file
+* ``--output, -o``: Output directory for KiCAD database files
+* ``--kicad-symbols``: Path to KiCAD symbol libraries
+* ``--kicad-footprints``: Path to KiCAD footprint libraries
+* ``--parallel``: Enable parallel processing
+* ``--threads``: Number of worker threads for parallel processing (default: 4)
+* ``--batch-size``: Batch size for processing components (default: 1000)
+* ``--cache``: Enable caching for improved performance
+* ``--fuzzy-threshold``: Threshold for fuzzy matching (0.0-1.0, default: 0.7)
+* ``--confidence-threshold``: Minimum confidence threshold for mappings (default: 0.5)
+* ``--validate-symbols``: Validate symbol existence in KiCAD libraries
+* ``--validate-footprints``: Validate footprint existence in KiCAD libraries
+* ``--create-views``: Create component type views in database (default: True)
+* ``--no-optimize``: Skip database optimization step
+* ``--advanced-mapping``: Use advanced mapping algorithms
+* ``--ml-mapping``: Enable machine learning-based mapping
+* ``--export-report``: Export detailed migration report to file
+
+**Example:**
+
+.. code-block:: bash
+
+   python run_cli.py migrate library.DbLib -o output_dir --parallel --threads 8 --cache
+
+validate
+~~~~~~~~
+
+Validates existing migration results.
+
+**Arguments:**
+
+* ``database``: Path to KiCAD database file to validate
+* ``original_data``: Path to original Altium data (JSON format)
+* ``--report``: Output validation report to file
+
+**Example:**
+
+.. code-block:: bash
+
+   python run_cli.py validate output_dir/components.db original_data.json --report validation_report.json
+
+test-connection
 ~~~~~~~~~~~~~~
 
-``--output OUTPUT``
-  Directory to save the generated KiCAD library
+Tests connection to an Altium database.
 
-``--library-name LIBRARY_NAME``
-  Name of the generated KiCAD library
+**Arguments:**
 
-Mapping Arguments
-~~~~~~~~~~~~~~~
+* ``dblib_file``: Path to Altium .DbLib file
+* ``--timeout``: Connection timeout in seconds (default: 30)
 
-``--confidence-threshold THRESHOLD``
-  Minimum confidence score to accept a mapping (0.0-1.0)
+**Example:**
 
-``--validate-symbols``
-  Validate symbols against KiCAD libraries
+.. code-block:: bash
 
-``--validate-footprints``
-  Validate footprints against KiCAD libraries
+   python run_cli.py test-connection library.DbLib --timeout 60
 
-Performance Arguments
-~~~~~~~~~~~~~~~~~~
+generate-sample
+~~~~~~~~~~~~~~
 
-``--parallel-processing``
-  Enable parallel processing
+Generates sample data for testing.
 
-``--max-workers MAX_WORKERS``
-  Maximum number of worker processes for parallel processing
+**Arguments:**
 
-``--batch-size BATCH_SIZE``
-  Number of components to process in each batch
+* ``output_dir``: Output directory for sample data
+* ``--components``: Number of sample components to generate (default: 100)
+* ``--tables``: Number of component tables to generate (default: 3)
 
-``--cache-results``
-  Cache mapping results for faster repeated migrations
+**Example:**
 
-``--cache-path CACHE_PATH``
-  Path to the cache directory
+.. code-block:: bash
 
-Logging Arguments
-~~~~~~~~~~~~~~~
+   python run_cli.py generate-sample test_data --components 200 --tables 5
 
-``--log-level {DEBUG,INFO,WARNING,ERROR,CRITICAL}``
-  Set the logging level
+info
+~~~~
 
-``--log-file LOG_FILE``
-  Path to the log file
+Shows information about an Altium database.
 
-``--verbose``
-  Enable verbose output
+**Arguments:**
 
-Utility Arguments
-~~~~~~~~~~~~~~~
+* ``dblib_file``: Path to Altium .DbLib file
+* ``--detailed``: Show detailed information about each table
 
-``--analyze``
-  Analyze the Altium database without performing migration
+**Example:**
 
-``--test-connection``
-  Test the database connection
+.. code-block:: bash
 
-``--component-limit COMPONENT_LIMIT``
-  Limit the number of components to process
+   python run_cli.py info library.DbLib --detailed
 
-``--component-filter COMPONENT_FILTER``
-  SQL WHERE clause to filter components
+Global Options
+-------------
 
-``--generate-mapping-report``
-  Generate a detailed mapping report
+These options can be used with any command:
 
-``--validate-output VALIDATE_OUTPUT``
-  Validate a previously generated KiCAD library
+* ``--config, -c``: Configuration file path (YAML, JSON, or INI)
+* ``--log-level``: Set logging level (DEBUG, INFO, WARNING, ERROR)
+* ``--quiet, -q``: Suppress non-error output
+* ``--verbose, -v``: Enable verbose output
 
-``--batch-config BATCH_CONFIG``
-  Path to the batch configuration file
+Return Codes
+-----------
 
-``--resume-from-checkpoint``
-  Resume migration from the last checkpoint
+The CLI returns the following exit codes:
 
-``--clean-output``
-  Clean the output directory before migration
+* ``0``: Success
+* ``1``: General error
+* ``130``: Operation cancelled by user (KeyboardInterrupt)
 
-``--force-regenerate``
-  Force regeneration of the KiCAD library
+Integration with Other Modules
+-----------------------------
 
-``--diagnostic-report``
-  Generate a diagnostic report for troubleshooting
+The CLI integrates with other modules of the migration tool:
+
+* ``AltiumDbLibParser``: For parsing Altium database files
+* ``ComponentMappingEngine`` and ``AdvancedMappingEngine``: For mapping components
+* ``KiCADDbLibGenerator``: For generating KiCAD database files
+* ``ConfigurationManager``: For managing configuration
+* ``MigrationValidator``: For validating migration results
+
+See Also
+--------
+
+* :doc:`core` - Core API documentation
+* :doc:`gui` - GUI API documentation
+* :doc:`utils` - Utility functions documentation

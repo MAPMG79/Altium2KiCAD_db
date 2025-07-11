@@ -1,0 +1,76 @@
+# Enterprise Migration Configuration Example
+# This configuration demonstrates settings optimized for large enterprise environments
+
+# Input and output paths
+altium_dblib_path: "/shared/enterprise/altium/components.DbLib"
+output_directory: "/shared/enterprise/kicad/libraries/"
+
+# Performance settings for high-volume processing
+enable_parallel_processing: true
+max_worker_threads: 16  # Adjust based on server capacity
+batch_size: 5000
+enable_caching: true
+vacuum_database: true
+
+# Mapping behavior with strict validation
+fuzzy_threshold: 0.8  # Higher threshold for stricter matching
+confidence_threshold: 0.7
+validate_symbols: true
+create_views: true
+
+# Comprehensive logging for audit trails
+logging:
+  level: INFO
+  format: "%(asctime)s - %(name)s - %(levelname)s - %(message)s - %(user)s"
+  file: "/shared/logs/migration/migration_$(date).log"
+  rotate: true
+  max_size: "100MB"
+  backup_count: 10
+  include_user: true
+
+# Database connection settings optimized for enterprise networks
+database:
+  timeout: 60
+  max_retries: 5
+  retry_delay: 3
+  connection_pool_size: 10
+  ssl_enabled: true
+  ssl_verify: true
+  ssl_ca_cert: "/etc/ssl/certs/enterprise-ca.crt"
+
+# KiCAD output settings with enterprise library paths
+kicad:
+  symbol_lib_path: "/shared/enterprise/kicad/symbols"
+  footprint_lib_path: "/shared/enterprise/kicad/footprints"
+  schema_version: "1.0"
+  component_table: "enterprise_components"
+  field_mapping:
+    "Comment": "Description"
+    "Library Ref": "Symbol"
+    "Footprint Ref": "Footprint"
+    "Library Path": "SymbolLibrary"
+    "Footprint Path": "FootprintLibrary"
+    "Value": "Value"
+    "ComponentLink1URL": "Datasheet"
+    "MfrPartNumber": "ManufacturerPartNumber"
+    "Manufacturer": "Manufacturer"
+    "Supplier": "PreferredSupplier"
+    "SupplierPartNumber": "SupplierPartNumber"
+    "Cost": "UnitCost"
+    "EnterprisePartNumber": "InternalPartNumber"
+
+# Enterprise-specific settings
+enterprise:
+  enable_audit_trail: true
+  user_authentication: true
+  role_based_access: true
+  notification:
+    email_on_completion: true
+    email_recipients: ["engineering@example.com", "librarian@example.com"]
+    slack_webhook: "https://hooks.slack.com/services/TXXXXXXXX/BXXXXXXXX/XXXXXXXXXXXXXXXXXXXXXXXX"
+  integration:
+    erp_system: "SAP"
+    erp_api_endpoint: "https://erp.example.com/api/v1/components"
+    erp_api_key_env: "ERP_API_KEY"
+    plm_system: "Windchill"
+    plm_api_endpoint: "https://plm.example.com/api/components"

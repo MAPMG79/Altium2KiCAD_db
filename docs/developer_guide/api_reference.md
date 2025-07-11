@@ -2,6 +2,25 @@
 
 This document provides comprehensive documentation for the Altium to KiCAD Database Migration Tool API. It covers all public classes, methods, and functions that developers can use to integrate with or extend the tool.
 
+## API Overview
+
+The Altium to KiCAD Database Migration Tool API is organized into several modules:
+
+* **Core API**: The main entry point for programmatic use of the migration tool
+* **CLI API**: Command-line interface for performing migrations without a GUI
+* **GUI API**: Graphical user interface for interactive migration operations
+* **Parser Module**: Components for parsing Altium database files
+* **Mapping Module**: Components for mapping Altium components to KiCAD equivalents
+* **Generator Module**: Components for generating KiCAD database libraries
+* **Utility Modules**: Helper functions and classes for configuration, logging, and database operations
+
+For detailed documentation on each module, see the following:
+
+* [Core API](../api/core.rst): Core functionality and data structures
+* [CLI API](../api/cli.rst): Command-line interface
+* [GUI API](../api/gui.rst): Graphical user interface
+* [Utility API](../api/utils.rst): Utility functions and classes
+
 ## Core API
 
 ### MigrationAPI
@@ -598,155 +617,174 @@ validation:
   kicad_symbol_lib_path: /path/to/kicad/symbols
   kicad_footprint_lib_path: /path/to/kicad/footprints
   report_missing: true
-  create_missing: false
 
 # Performance settings
 performance:
   parallel_processing: true
   max_workers: 4
-  batch_size: 100
-  cache_results: true
-  cache_path: cache/
-  memory_limit: 2048  # MB
+  batch_size: 1000
+  enable_caching: true
+  cache_directory: .cache/
+  optimize_database: true
 
 # Logging settings
 logging:
-  log_level: INFO
-  log_file: migration.log
+  level: INFO
+  file: migration.log
   console: true
-  log_format: detailed  # simple or detailed
+  format: "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
 ```
 
 ## Error Handling
 
 ### Exception Hierarchy
 
-```
-MigrationError
-├── ConfigurationError
-├── DatabaseError
-│   ├── ConnectionError
-│   └── QueryError
-├── ParsingError
-├── MappingError
-├── ValidationError
-└── GenerationError
-```
+The migration tool defines a hierarchy of exceptions for different error types:
+
+- `MigrationError`: Base exception for all migration errors
+  - `ConfigurationError`: Error in configuration
+  - `ConnectionError`: Error connecting to database
+  - `ParsingError`: Error parsing Altium database
+  - `MappingError`: Error mapping components
+    - `SymbolMappingError`: Error mapping symbols
+    - `FootprintMappingError`: Error mapping footprints
+  - `GenerationError`: Error generating KiCAD library
+  - `ValidationError`: Error validating migration
 
 ### Handling Errors
 
 ```python
 from migration_tool import MigrationAPI
-from migration_tool.exceptions import MigrationError, DatabaseError
-
-api = MigrationAPI()
+from migration_tool.exceptions import MigrationError, MappingError
 
 try:
+    api = MigrationAPI()
     result = api.run_migration(config)
-except DatabaseError as e:
-    print(f"Database error: {e}")
-    # Handle database-specific errors
+except MappingError as e:
+    print(f"Mapping error: {e}")
+    print(f"Component: {e.component}")
+    print(f"Suggested fix: {e.suggestion}")
 except MigrationError as e:
-    print(f"Migration error: {e}")
-    # Handle general migration errors
+    print(f"Migration failed: {e}")
 ```
 
-## Advanced Usage Examples
+## Advanced Usage
 
 ### Custom Mapping Algorithm
 
+You can implement custom mapping algorithms by extending the `MappingEngine` class:
+
 ```python
-from migration_tool import MigrationAPI
-from migration_tool.core.mapping_engine import MappingEngine, MappingRule
+from migration_tool.core.mapping_engine import MappingEngine
 
 class CustomMappingEngine(MappingEngine):
-    def __init__(self, config_manager, logger=None, cache_manager=None):
-        super().__init__(config_manager, logger, cache_manager)
-        
     def map_component(self, component):
-        # Custom mapping logic
-        # ...
+        # Custom mapping logic here
         return mapped_component
 
 # Use the custom mapping engine
-api = MigrationAPI()
-components = api.parse_altium_database('path/to/library.DbLib')
-
-# Create custom mapping engine
-custom_engine = CustomMappingEngine(api._config_manager, api._logger)
+custom_engine = CustomMappingEngine(config_manager)
 mapped_components = custom_engine.map_components(components)
 
+# Create custom mapping engine
+engine = CustomMappingEngine(config_manager)
+
 # Continue with generation
-output_path = api.generate_kicad_library(mapped_components, 'output/', 'MyLibrary')
+generator = KiCADDbLibGenerator(config_manager)
+output_path = generator.generate_library(mapped_components, 'output/', 'MyLibrary')
 ```
 
 ### Batch Processing with Progress Reporting
 
+For processing large libraries, you can use batch processing with progress reporting:
+
 ```python
+import tqdm
 from migration_tool import MigrationAPI
-from tqdm import tqdm
-import os
 
 api = MigrationAPI()
+components = api.parse_altium_database('path/to/library.DbLib')
 
-# Get list of DbLib files
-dblib_files = [f for f in os.listdir('libraries/') if f.endswith('.DbLib')]
+# Process in batches of 100 components
+batch_size = 100
+batches = [components[i:i+batch_size] for i in range(0, len(components), batch_size)]
+
+mapped_components = []
+for batch in tqdm.tqdm(batches, desc="Mapping components"):
+    batch_mapped = api.map_components(batch)
+    mapped_components.extend(batch_mapped)
+
+output_path = api.generate_kicad_library(mapped_components, 'output/', 'MyLibrary')
+```
 
 # Process each file with progress bar
-for dblib_file in tqdm(dblib_files, desc="Processing libraries"):
-    config = {
-        'input_path': f'libraries/{dblib_file}',
-        'output_directory': 'output/',
-        'library_name': os.path.splitext(dblib_file)[0]
-    }
-    
+```python
+import os
+import tqdm
+from migration_tool import MigrationAPI
+
+api = MigrationAPI()
+dblib_files = [f for f in os.listdir('libraries') if f.endswith('.DbLib')]
+
+for dblib_file in tqdm.tqdm(dblib_files, desc="Processing libraries"):
     try:
+        config = {
+            'input_path': os.path.join('libraries', dblib_file),
+            'output_directory': 'output/',
+            'library_name': os.path.splitext(dblib_file)[0]
+        }
         result = api.run_migration(config)
+        
         if result['success']:
-            tqdm.write(f"Successfully migrated {dblib_file}")
+            print(f"✓ {dblib_file}: {result['component_count']} components")
         else:
-            tqdm.write(f"Failed to migrate {dblib_file}: {result['error']}")
+            print(f"✗ {dblib_file}: {result['error']}")
     except Exception as e:
-        tqdm.write(f"Error processing {dblib_file}: {str(e)}")
+        print(f"✗ {dblib_file}: {str(e)}")
 ```
 
 ### Integration with Web Application
 
+The migration tool can be integrated with web applications using the API:
+
 ```python
 from flask import Flask, request, jsonify
 from migration_tool import MigrationAPI
-import os
 
 app = Flask(__name__)
 api = MigrationAPI()
 
-@app.route('/migrate', methods=['POST'])
+@app.route('/api/migrate', methods=['POST'])
 def migrate():
-    # Get parameters from request
-    input_path = request.form.get('input_path')
-    output_dir = request.form.get('output_directory', 'output/')
-    library_name = request.form.get('library_name')
-    
-    # Validate inputs
-    if not input_path or not os.path.exists(input_path):
-        return jsonify({'error': 'Invalid input path'}), 400
-    
-    if not library_name:
-        library_name = os.path.splitext(os.path.basename(input_path))[0]
-    
-    # Create configuration
-    config = {
-        'input_path': input_path,
-        'output_directory': output_dir,
-        'library_name': library_name
-    }
+    # Get configuration from request
+    config = request.json
     
     # Run migration
     try:
         result = api.run_migration(config)
         return jsonify(result)
     except Exception as e:
-        return jsonify({'error': str(e)}), 500
+        return jsonify({
+            'success': False,
+            'error': str(e)
+        }), 500
+
+@app.route('/api/validate', methods=['POST'])
+def validate():
+    # Get components from request
+    data = request.json
+    components = data['components']
+    
+    # Map and validate components
+    try:
+        mapped_components = api.map_components(components)
+        validation_results = api.validate_mapping(mapped_components)
+        return jsonify(validation_results)
+    except Exception as e:
+        return jsonify({
+            'success': False,
+            'error': str(e)
+        }), 500
 
 if __name__ == '__main__':
     app.run(debug=True)
@@ -754,15 +792,31 @@ if __name__ == '__main__':
 
 ## API Versioning
 
-The API follows semantic versioning (MAJOR.MINOR.PATCH):
+The migration tool follows semantic versioning:
 
-- MAJOR version changes indicate incompatible API changes
-- MINOR version changes add functionality in a backward-compatible manner
-- PATCH version changes make backward-compatible bug fixes
+- **Major version**: Incompatible API changes
+- **Minor version**: New features in a backward-compatible manner
+- **Patch version**: Backward-compatible bug fixes
 
-To check the current API version:
+API versions are accessible through the `__version__` attribute:
 
 ```python
 from migration_tool import __version__
 
 print(f"Migration Tool API version: {__version__}")
+```
+
+For backward compatibility with older versions, use the appropriate version-specific imports:
+
+```python
+# For version 1.x
+from migration_tool.v1 import MigrationAPI as MigrationAPIV1
+
+# For version 2.x
+from migration_tool.v2 import MigrationAPI as MigrationAPIV2
+
+# Use the appropriate version
+if some_condition:
+    api = MigrationAPIV1()
+else:
+    api = MigrationAPIV2()

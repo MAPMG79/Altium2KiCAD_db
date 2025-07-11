@@ -1,3 +1,4 @@
+# docker-compose.yml - Development environment
 version: '3.8'
 
 services:
@@ -5,80 +6,34 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
-    image: altium2kicad:latest
-    container_name: altium2kicad
+    container_name: altium-kicad-migration
     volumes:
       - ./data:/app/data
-      - ./config:/app/config
+      - ./output:/app/output
       - ./logs:/app/logs
-    ports:
-      - "8080:8080"  # For GUI if applicable
+      - ./config:/app/config
     environment:
+      - PYTHONPATH=/app
       - LOG_LEVEL=INFO
-      - CONFIG_PATH=/app/config/default_config.yaml
-    command: ["--config", "/app/config/default_config.yaml"]
-    restart: unless-stopped
-
-  # Development service with mounted source code for live development
-  dev:
-    build:
-      context: .
-      dockerfile: Dockerfile
-    image: altium2kicad:dev
-    container_name: altium2kicad-dev
-    volumes:
-      - .:/app
+    # Uncomment for GUI access (requires X11 forwarding)
+    # environment:
+    #   - DISPLAY=${DISPLAY}
+    # volumes:
+    #   - /tmp/.X11-unix:/tmp/.X11-unix:rw
+    # network_mode: host
+    
+  # Optional: Database for testing
+  test-database:
+    image: postgres:13
+    container_name: migration-test-db
+    environment:
+      - POSTGRES_DB=test_components
+      - POSTGRES_USER=testuser
+      - POSTGRES_PASSWORD=testpass
     ports:
-      - "8081:8080"  # Different port to avoid conflicts with main service
-    environment:
-      - LOG_LEVEL=DEBUG
-      - CONFIG_PATH=/app/config/default_config.yaml
-      - PYTHONPATH=/app
-    command: ["--config", "/app/config/default_config.yaml", "--debug"]
-    restart: "no"
-
-  # Service for running tests
-  test:
-    build:
-      context: .
-      dockerfile: Dockerfile
-    image: altium2kicad:test
-    container_name: altium2kicad-test
+      - "5432:5432"
     volumes:
-      - .:/app
-    environment:
-      - PYTHONPATH=/app
-      - LOG_LEVEL=DEBUG
-    command: ["pytest", "-xvs", "tests/"]
-    restart: "no"
+      - postgres_data:/var/lib/postgresql/data
 
-  # Service for generating sample data
-  sample-data:
-    build:
-      context: .
-      dockerfile: Dockerfile
-    image: altium2kicad:sample-data
-    container_name: altium2kicad-sample-data
-    volumes:
-      - ./sample_data:/app/sample_data
-    environment:
-      - PYTHONPATH=/app
-    entrypoint: ["python", "scripts/generate_sample_data.py"]
-    command: ["--output-dir", "/app/sample_data", "--test-cases"]
-    restart: "no"
-
-  # Service for running performance benchmarks
-  benchmark:
-    build:
-      context: .
-      dockerfile: Dockerfile
-    image: altium2kicad:benchmark
-    container_name: altium2kicad-benchmark
-    volumes:
-      - ./sample_data:/app/sample_data
-      - ./benchmark_results:/app/benchmark_results
-    environment:
-      - PYTHONPATH=/app
-    entrypoint: ["python", "scripts/performance_benchmark.py"]
-    command: ["--input-dir", "/app/sample_data", "--output-dir", "/app/benchmark_results"]
-    restart: "no"
+volumes:
+  postgres_data:

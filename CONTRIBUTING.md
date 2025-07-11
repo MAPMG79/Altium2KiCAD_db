@@ -4,7 +4,9 @@ Thank you for your interest in contributing to the Altium to KiCAD Database Migr
 
 ## Code of Conduct
 
-By participating in this project, you agree to abide by our Code of Conduct:
+This project adheres to the [Contributor Covenant Code of Conduct](CODE_OF_CONDUCT.md). By participating, you are expected to uphold this code.
+
+Our Code of Conduct principles:
 
 - Be respectful and inclusive
 - Be patient and welcoming
@@ -28,202 +30,150 @@ There are many ways to contribute to the project:
 
 ### Reporting Bugs
 
-Before creating a bug report:
+Before creating bug reports, please check the issue list as you might find that the problem has already been reported. When creating a bug report, include:
 
-1. Check the [existing issues](https://github.com/yourusername/Altium2KiCAD_db/issues) to see if the problem has already been reported
-2. Check the [FAQ](https://altium2kicad-db.readthedocs.io/en/latest/user_guide/faq.html) and [Troubleshooting Guide](https://altium2kicad-db.readthedocs.io/en/latest/user_guide/troubleshooting.html) for solutions
-
-When creating a bug report, include as much information as possible:
-
-- A clear and descriptive title
-- Detailed steps to reproduce the issue
-- Expected vs. actual behavior
-- Screenshots or code snippets if applicable
-- System information (OS, Python version, etc.)
-- Log files or error messages
-- Any additional context that might be helpful
+- **Clear description** of the problem
+- **Steps to reproduce** the issue
+- **Expected behavior** vs actual behavior
+- **Environment details** (OS, Python version, etc.)
+- **Log files** and error messages
+- **Sample data** (remove sensitive information)
 
 Use the bug report template when creating a new issue.
 
 ### Suggesting Enhancements
 
-Enhancement suggestions are welcome! When suggesting an enhancement:
+Enhancement suggestions are tracked as GitHub issues. When creating an enhancement suggestion:
 
-- Use a clear and descriptive title
-- Provide a detailed description of the proposed enhancement
-- Explain why this enhancement would be useful
-- Include examples of how it would be used
-- Consider the impact on existing users and functionality
-- Suggest an implementation approach if possible
+- **Use a clear and descriptive title**
+- **Provide detailed description** of the enhancement
+- **Explain why this enhancement would be useful**
+- **Consider providing mockups** for UI changes
 
 Use the feature request template when creating a new issue.
 
 ### Pull Requests
 
-We welcome pull requests! To submit a pull request:
-
-1. Fork the repository
-2. Create a new branch for your changes
-3. Make your changes
-4. Add or update tests as needed
-5. Update documentation as needed
-6. Ensure all tests pass
-7. Submit a pull request
+1. **Fork** the repository
+2. **Create a feature branch** from `develop`
+3. **Make your changes** with clear commit messages
+4. **Add tests** for new functionality
+5. **Update documentation** as needed
+6. **Ensure tests pass** and code quality checks pass
+7. **Submit a pull request**
 
 ## Development Environment
 
 ### Prerequisites
 
-- Python 3.8 or higher
+- Python 3.7+
 - Git
-- A GitHub account
+- Virtual environment tool (venv, conda, etc.)
 - Familiarity with both Altium and KiCAD (for certain contributions)
 
-### Setup
+### Development Setup
 
-1. **Fork the repository**:
-   - Visit the [GitHub repository](https://github.com/yourusername/Altium2KiCAD_db)
-   - Click the "Fork" button in the top-right corner
+```bash
+# Clone the repository
+git clone https://github.com/your-org/altium-kicad-migration.git
+cd altium-kicad-migration
 
-2. **Clone your fork**:
-   ```bash
-   git clone https://github.com/YOUR-USERNAME/Altium2KiCAD_db.git
-   cd Altium2KiCAD_db
-   ```
+# Create virtual environment
+python -m venv venv
+source venv/bin/activate  # On Windows: venv\Scripts\activate
 
-3. **Create a virtual environment**:
-   ```bash
-   python -m venv venv
-   source venv/bin/activate  # On Windows: venv\Scripts\activate
-   ```
+# Install development dependencies
+make install-dev
 
-4. **Install development dependencies**:
-   ```bash
-   pip install -e ".[dev]"
-   ```
+# Set up pre-commit hooks
+pre-commit install
 
-5. **Set up pre-commit hooks**:
-   ```bash
-   pre-commit install
-   ```
+# Run tests to verify setup
+make test
+```
 
 ### Development Workflow
 
-1. **Create a feature branch**:
-   ```bash
-   git checkout -b feature/your-feature-name
-   ```
+```bash
+# Create feature branch
+git checkout develop
+git pull origin develop
+git checkout -b feature/your-feature-name
 
-2. **Make your changes**:
-   - Write code that follows the project's style guidelines
-   - Add tests for your changes
-   - Update documentation as needed
+# Make changes and test
+make test
+make lint
+make format
 
-3. **Run tests locally**:
-   ```bash
-   # Run all tests
-   pytest
-   
-   # Run with coverage
-   pytest --cov=migration_tool
-   
-   # Run specific test categories
-   pytest tests/unit/
-   pytest tests/integration/
-   pytest tests/functional/
-   ```
+# Commit changes
+git add .
+git commit -m "Add feature: your feature description"
 
-4. **Commit your changes**:
-   ```bash
-   git add .
-   git commit -m "Add your meaningful commit message here"
-   ```
-
-5. **Push to your fork**:
-   ```bash
-   git push origin feature/your-feature-name
-   ```
-
-6. **Create a pull request**:
-   - Go to your fork on GitHub
-   - Click "New Pull Request"
-   - Select your feature branch
-   - Add a clear description of your changes
-   - Submit the pull request
+# Push and create pull request
+git push origin feature/your-feature-name
+```
 
 ## Code Style
 
-We follow these coding standards:
+We use the following tools for code quality:
 
-1. **PEP 8**: Follow the [PEP 8](https://www.python.org/dev/peps/pep-0008/) style guide for Python code.
-2. **Docstrings**: Use Google-style docstrings for all functions, classes, and methods.
-3. **Type Hints**: Include type hints for function parameters and return values.
-4. **Imports**: Sort imports using `isort` and follow the standard import order.
-5. **Line Length**: Limit lines to 88 characters (compatible with Black).
+- **Black** for code formatting
+- **isort** for import sorting
+- **flake8** for linting
+- **mypy** for type checking
 
-We use the following tools to enforce code style:
-
-- **Black**: For code formatting
-- **isort**: For import sorting
-- **flake8**: For linting
-- **mypy**: For type checking
-
-You can run these tools with:
+Run all checks with:
 
 ```bash
-# Format code
-black migration_tool/ tests/
+make lint
+```
 
-# Sort imports
-isort migration_tool/ tests/
+Format code with:
 
-# Lint code
-flake8 migration_tool/ tests/
-
-# Type checking
-mypy migration_tool/
+```bash
+make format
 ```
 
 ## Testing
 
-All contributions should include appropriate tests:
+### Running Tests
 
-1. **Unit Tests**: Test individual functions and classes
-2. **Integration Tests**: Test interactions between components
-3. **Functional Tests**: Test end-to-end workflows
+```bash
+# Run all tests
+make test
 
-Tests should be placed in the `tests/` directory, following the same structure as the code they test.
+# Run specific test categories
+pytest tests/unit/
+pytest tests/integration/
+pytest tests/performance/
+
+# Run with coverage
+make test-coverage
+```
 
 ### Writing Tests
 
-- Use pytest for writing tests
-- Keep tests simple and focused
+- Write tests for all new functionality
+- Follow existing test patterns
 - Use descriptive test names
-- Use fixtures for common setup
+- Include both positive and negative test cases
 - Mock external dependencies
-- Test both success and failure cases
-- Include edge cases
 
-Example test:
+Example test structure:
 
 ```python
-def test_mapping_engine_maps_resistor_correctly():
-    """Test that the mapping engine correctly maps a resistor component."""
+def test_component_mapping_success():
+    """Test successful component mapping with valid data."""
     # Arrange
-    component = {
-        'LibRef': 'RES_10K',
-        'Description': '10K Resistor',
-        'Footprint': 'AXIAL-0.3'
-    }
-    engine = MappingEngine(config_manager)
+    component_data = {...}
+    mapper = ComponentMappingEngine()
     
     # Act
-    mapped_component = engine.map_component(component)
+    result = mapper.map_component(component_data)
     
     # Assert
-    assert mapped_component['Symbol']['name'] == 'Device:R'
-    assert mapped_component['Footprint']['name'] == 'Resistor_THT:R_Axial_DIN0207_L6.3mm_D2.5mm_P10.16mm_Horizontal'
-    assert mapped_component['Confidence'] >= 0.8
+    assert result.confidence > 0.8
+    assert result.kicad_symbol == "Device:R"
 ```
 
 ## Documentation
@@ -269,72 +219,67 @@ python -m cProfile -o profile.stats your_script.py
 python -c "import pstats; p = pstats.Stats('profile.stats'); p.sort_stats('cumtime').print_stats(30)"
 ```
 
-## Design Principles
+## Architecture Guidelines
 
-Follow these design principles when contributing:
+### Design Principles
 
-1. **Separation of Concerns**: Each component should have a well-defined responsibility
-2. **Dependency Injection**: Components should receive dependencies through constructors or methods
-3. **Interface-Based Design**: Components should interact through well-defined interfaces
-4. **Configuration Over Convention**: Use explicit configuration rather than implicit conventions
-5. **Fail Fast and Validate Early**: Validate input early and provide clear error messages
-6. **Comprehensive Logging**: Log operations at appropriate levels
+- **Single Responsibility**: Each class/function has one clear purpose
+- **Dependency Injection**: Use configuration and dependency injection
+- **Error Handling**: Comprehensive error handling with recovery
+- **Logging**: Detailed logging for debugging
+- **Testability**: Design for easy testing
 
-## Adding New Features
+### Adding New Features
 
-When adding new features:
-
-1. **Discuss First**: Open an issue to discuss the feature before implementing
-2. **Start Small**: Break large features into smaller, manageable pieces
-3. **Maintain Compatibility**: Ensure backward compatibility when possible
-4. **Document Thoroughly**: Provide comprehensive documentation for the feature
-5. **Add Tests**: Include tests that cover the new functionality
-6. **Consider Edge Cases**: Think about potential edge cases and handle them appropriately
+1. **Design first**: Create design document for complex features
+2. **Interface definition**: Define clear interfaces
+3. **Implementation**: Implement with tests
+4. **Documentation**: Update relevant documentation
+5. **Examples**: Provide usage examples
 
 ## Database Schema Changes
 
-When making changes to the database schema:
+When modifying database schemas:
 
-1. **Document Changes**: Clearly document schema changes
-2. **Provide Migration Path**: Include migration scripts for existing databases
-3. **Test Thoroughly**: Test with various database sizes and contents
-4. **Consider Backward Compatibility**: Ensure changes don't break existing data
+1. **Migration scripts**: Provide upgrade/downgrade scripts
+2. **Backward compatibility**: Maintain compatibility when possible
+3. **Documentation**: Update schema documentation
+4. **Testing**: Test migration scripts thoroughly
 
-## Version Numbering
+## Release Process
 
-We follow [Semantic Versioning](https://semver.org/):
+### Version Numbering
 
-- **MAJOR** version for incompatible API changes
-- **MINOR** version for backward-compatible functionality additions
-- **PATCH** version for backward-compatible bug fixes
+We use semantic versioning (MAJOR.MINOR.PATCH):
 
-## Release Checklist
+- **MAJOR**: Incompatible API changes
+- **MINOR**: New functionality (backward compatible)
+- **PATCH**: Bug fixes (backward compatible)
 
-Before a release:
+### Release Checklist
 
-1. Update version number in `__init__.py` and `setup.py`
-2. Update CHANGELOG.md with the changes
-3. Ensure all tests pass
-4. Build and check documentation
-5. Create a release branch
-6. Tag the release
-7. Build and publish the package
+1. Update version number
+2. Update CHANGELOG.md
+3. Run full test suite
+4. Update documentation
+5. Create release tag
+6. Publish to PyPI
+7. Update Docker images
 
-## Communication Channels
+## Community
 
-- **GitHub Issues**: For bug reports and feature requests
-- **Pull Requests**: For code contributions
-- **Discussions**: For general questions and discussions
-- **Email**: For private inquiries (maintainer@example.com)
+### Communication Channels
 
-## Recognition
+- **GitHub Issues**: Bug reports and feature requests
+- **GitHub Discussions**: General discussion and questions
+- **Pull Requests**: Code contributions and reviews
 
-All contributors will be recognized in:
+### Recognition
 
-1. **CONTRIBUTORS.md**: List of all contributors
-2. **Release Notes**: Contributors to each release
-3. **Documentation**: Attribution for significant contributions
+Contributors are recognized in:
 
-## Thank You!
+- README.md contributors section
+- Release notes
+- Documentation credits
 
-Thank you for contributing to the Altium to KiCAD Database Migration Tool! Your contributions help make this tool better for everyone in the electronics design community.
+Thank you for contributing to the Altium to KiCAD Migration Tool!

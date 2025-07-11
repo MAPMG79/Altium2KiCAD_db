@@ -2,14 +2,27 @@
 
 This guide provides detailed instructions for installing the Altium to KiCAD Database Migration Tool on various platforms.
 
+## Features
+
+The Altium to KiCAD Database Migration Tool offers the following capabilities:
+
+- **Complete Database Migration**: Parse Altium `.DbLib` files and extract all component data
+- **Intelligent Mapping**: Automatic mapping of symbols and footprints with confidence scoring
+- **Component Categorization**: Automatic categorization of components (resistors, capacitors, ICs, etc.)
+- **Customizable Mappings**: Add custom symbol/footprint mappings for better accuracy
+- **Detailed Reports**: Comprehensive migration reports with statistics and recommendations
+- **GUI Interface**: User-friendly graphical interface for easy migration
+- **Multiple Database Support**: Works with Access, SQL Server, MySQL, PostgreSQL, and SQLite databases
+
 ## System Requirements
 
 Before installing, ensure your system meets the following requirements:
 
 - **Operating System**: Windows 10/11, macOS 10.14+, or Linux (Ubuntu 18.04+, Debian 10+, Fedora 32+)
-- **Python**: Python 3.8 or higher
-- **Disk Space**: At least 500 MB of free disk space
+- **Python**: Python 3.7 or higher
+- **Disk Space**: At least 1GB free disk space
 - **Memory**: Minimum 4 GB RAM (8 GB recommended for large databases)
+- **Database Access**: Access to the Altium database (local or network)
 - **Database Drivers**: Appropriate database drivers for your source database
 
 ## Installation Methods
@@ -70,6 +83,14 @@ For users who prefer not to install Python:
 
 Depending on your source database, you'll need to install the appropriate drivers:
 
+### Python Dependencies
+
+```bash
+pip install pyodbc
+pip install sqlite3  # Usually included with Python
+pip install tkinter   # Usually included with Python
+```
+
 ### SQLite
 
 SQLite support is included by default, no additional drivers needed.
@@ -85,6 +106,12 @@ pip install mysqlclient
 ```bash
 pip install psycopg2-binary
 ```
+
+### Microsoft Access Databases (.mdb/.accdb)
+
+#### Windows
+- Microsoft Access Database Engine Redistributable
+- Download: https://www.microsoft.com/en-us/download/details.aspx?id=54920
 
 ### Microsoft SQL Server
 
@@ -177,4 +204,4 @@ pip install altium2kicad-db
 
 ## Next Steps
 
-After successful installation, proceed to the [Quickstart Guide](quickstart.md) to perform your first migration.
+After successful installation, proceed to the [Basic Usage Guide](basic_usage.md) to perform your first migration.

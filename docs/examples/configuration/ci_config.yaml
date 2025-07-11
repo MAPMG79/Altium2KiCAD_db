@@ -1,0 +1,49 @@
+# CI/CD Pipeline Configuration Example
+# This configuration is optimized for continuous integration environments
+
+# Input and output paths
+altium_dblib_path: "${CI_PROJECT_DIR}/input/components.DbLib"
+output_directory: "${CI_PROJECT_DIR}/output/"
+
+# Performance settings optimized for CI runners
+enable_parallel_processing: true
+max_worker_threads: 2  # Conservative setting for shared CI runners
+batch_size: 500
+enable_caching: true
+vacuum_database: false  # Skip vacuum to speed up CI runs
+
+# Strict validation for CI quality checks
+fuzzy_threshold: 0.9  # Very strict matching for CI
+confidence_threshold: 0.8
+validate_symbols: true
+create_views: true
+
+# Logging configuration for CI environments
+logging:
+  level: DEBUG  # Verbose logging for CI troubleshooting
+  format: "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+  file: "${CI_PROJECT_DIR}/logs/migration.log"
+
+# Database connection settings
+database:
+  timeout: 15  # Shorter timeout for CI
+  max_retries: 2
+  retry_delay: 1
+
+# KiCAD output settings
+kicad:
+  symbol_lib_path: "${CI_PROJECT_DIR}/libraries/symbols"
+  footprint_lib_path: "${CI_PROJECT_DIR}/libraries/footprints"
+  schema_version: "1.0"
+  component_table: "components"
+
+# CI-specific settings
+ci:
+  fail_on_warning: true  # Fail CI pipeline on warnings
+  generate_report: true
+  report_format: "junit"
+  report_path: "${CI_PROJECT_DIR}/reports/migration-report.xml"
+  artifacts:
+    - "${CI_PROJECT_DIR}/output/**/*"
+    - "${CI_PROJECT_DIR}/reports/**/*"
+    - "${CI_PROJECT_DIR}/logs/**/*"

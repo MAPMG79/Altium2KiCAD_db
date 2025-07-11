@@ -1,331 +1,265 @@
-# Basic Migration Example
+# Basic Usage Guide
 
-This tutorial provides a step-by-step guide for performing a basic migration from an Altium DbLib to a KiCAD database library using the Altium to KiCAD Database Migration Tool.
+This guide covers the basic usage of the Altium to KiCAD Migration Tool for common migration scenarios.
 
 ## Prerequisites
 
-Before starting this tutorial, ensure you have:
+Before starting a migration, ensure you have:
 
-1. Installed the Altium to KiCAD Database Migration Tool (see [Installation Guide](../user_guide/installation.md))
-2. Access to an Altium DbLib file or database
-3. Appropriate database drivers installed (if applicable)
-4. Basic familiarity with both Altium and KiCAD
+1. **Altium .DbLib file** and associated database
+2. **Database connectivity** (ODBC drivers installed)
+3. **Output directory** with write permissions
+4. **KiCAD installed** (optional, for symbol/footprint validation)
 
-## Example Scenario
+## Basic Migration Workflow
 
-In this tutorial, we'll migrate a simple resistor library from Altium to KiCAD. We'll use:
+### Step 1: Test Database Connection
 
-- An Altium DbLib file named `resistors.DbLib`
-- A SQLite database as the output format
-- Basic mapping rules for resistor components
-
-## Step 1: Prepare Your Environment
-
-First, let's create a working directory for our migration:
+Before running a full migration, test your database connection:
 
 ```bash
-# Create a working directory
-mkdir altium2kicad_migration
-cd altium2kicad_migration
+altium-kicad-migrate test-connection path/to/your.DbLib
+````
 
-# Create an output directory
-mkdir output
-```
+This command will:
 
-## Step 2: Analyze the Altium Database
+- Parse the .DbLib configuration
+- Attempt to connect to the database
+- Display table information
+- Report any connection issues
 
-Before performing the full migration, it's a good idea to analyze the Altium database to understand its structure and contents:
+### Step 2: Analyze Database Contents
+
+Get information about your database structure:
 
 ```bash
-# Analyze the database
-altium2kicad --analyze --input path/to/resistors.DbLib
+altium-kicad-migrate info path/to/your.DbLib --detailed
 ```
 
-This will generate a report showing:
+This shows:
 
-```
-Database Analysis Report
-=======================
+- Number of tables
+- Component counts per table
+- Sample component fields
+- Database statistics
 
-Connection Information:
-- Database Type: SQLite
-- Database Path: resistors.db
-- Tables: Components, Parameters, ComponentParameters
+### Step 3: Run Basic Migration
 
-Component Statistics:
-- Total Components: 150
-- Component Categories: Resistors (150)
+Perform a basic migration with default settings:
 
-Field Statistics:
-- Common Fields: LibRef, Comment, Description, Footprint, Value, Tolerance, Power
-- Optional Fields: Temperature Coefficient, Manufacturer, Manufacturer Part Number
-
-Potential Issues:
-- No issues detected
+```bash
+altium-kicad-migrate migrate path/to/your.DbLib -o output_directory
 ```
 
-## Step 3: Create a Configuration File
+This will:
 
-Create a file named `migration_config.yaml` with the following content:
+- Extract all component data
+- Map components to KiCAD format
+- Generate SQLite database
+- Create .kicad_dbl library file
+- Generate migration report
+
+### Step 4: Validate Results
+
+After migration, validate the results:
+
+```bash
+altium-kicad-migrate validate output_directory/components.db original_data.json
+```
+
+## Migration Options
+
+### Parallel Processing
+
+For large databases, enable parallel processing:
+
+```bash
+altium-kicad-migrate migrate input.DbLib -o output/ --parallel --threads 8
+```
+
+### Caching
+
+Enable caching for repeated migrations:
+
+```bash
+altium-kicad-migrate migrate input.DbLib -o output/ --cache
+```
+
+### Symbol/Footprint Validation
+
+Validate against KiCAD libraries:
+
+```bash
+altium-kicad-migrate migrate input.DbLib -o output/ \
+    --kicad-symbols /path/to/kicad/symbols \
+    --validate-symbols --validate-footprints
+```
+
+### Confidence Thresholds
+
+Set mapping confidence thresholds:
+
+```bash
+altium-kicad-migrate migrate input.DbLib -o output/ \
+    --fuzzy-threshold 0.8 --confidence-threshold 0.6
+```
+
+## Configuration Files
+
+### Creating Configuration
+
+Create a configuration file for repeated use:
 
 ```yaml
-# Input configuration
-input:
-  path: path/to/resistors.DbLib
-  connection_timeout: 30
-
-# Output configuration
-output:
-  directory: output/
-  library_name: Resistors
-  format: sqlite
-  create_report: true
-
-# Mapping settings
-mapping:
-  confidence_threshold: 0.7
-  use_custom_rules: true
-  custom_rules_path: custom_rules.yaml
-
-# Validation settings
-validation:
-  validate_symbols: true
-  validate_footprints: true
-  report_missing: true
-
-# Performance settings
-performance:
-  parallel_processing: true
-  max_workers: 4
-  batch_size: 100
-  cache_results: true
+# migration_config.yaml
+altium_dblib_path: "input/components.DbLib"
+output_directory: "output/"
+enable_parallel_processing: true
+max_worker_threads: 4
+batch_size: 1000
+enable_caching: true
+fuzzy_threshold: 0.7
+confidence_threshold: 0.5
+validate_symbols: true
+create_views: true
+vacuum_database: true
 ```
 
-## Step 4: Create Custom Mapping Rules
-
-Create a file named `custom_rules.yaml` with the following content:
-
-```yaml
-# Custom mapping rules for resistors
-symbols:
-  - altium_pattern: "RES.*"
-    kicad_symbol: "Device:R"
-    confidence: 0.9
-  
-  - altium_pattern: "RESISTOR.*"
-    kicad_symbol: "Device:R"
-    confidence: 0.9
-  
-  - altium_pattern: "R-.*"
-    kicad_symbol: "Device:R"
-    confidence: 0.9
-
-footprints:
-  - altium_pattern: "AXIAL-.*"
-    kicad_footprint: "Resistor_THT:R_Axial_DIN0207_L6.3mm_D2.5mm_P10.16mm_Horizontal"
-    confidence: 0.9
-  
-  - altium_pattern: "SMD-.*0603.*"
-    kicad_footprint: "Resistor_SMD:R_0603_1608Metric"
-    confidence: 0.9
-  
-  - altium_pattern: "SMD-.*0805.*"
-    kicad_footprint: "Resistor_SMD:R_0805_2012Metric"
-    confidence: 0.9
-  
-  - altium_pattern: "SMD-.*1206.*"
-    kicad_footprint: "Resistor_SMD:R_1206_3216Metric"
-    confidence: 0.9
-
-categories:
-  - altium_pattern: "Resistors"
-    kicad_category: "Passive Components/Resistors"
-    confidence: 1.0
-```
-
-## Step 5: Run the Migration
-
-Now, run the migration using the configuration file:
+### Using Configuration
 
 ```bash
-# Run the migration
-altium2kicad --config migration_config.yaml
+altium-kicad-migrate migrate --config migration_config.yaml
 ```
 
-You should see output similar to:
+## Understanding Output
+
+### Generated Files
+
+After migration, you'll find:
 
 ```
-Altium to KiCAD Database Migration Tool v1.0.0
-==============================================
-
-Loading configuration from migration_config.yaml
-Connecting to Altium database: resistors.DbLib
-Successfully connected to database
-Extracting components...
-Found 150 components
-Mapping components...
-[====================] 100% (150/150)
-Mapping complete: 150 components mapped
-Generating KiCAD library...
-Creating SQLite database: output/Resistors.sqlite
-Creating tables and views...
-Writing components...
-[====================] 100% (150/150)
-Library generation complete
-Generating report...
-Report saved to: output/migration_report.html
-
-Migration Summary:
-- Components Processed: 150
-- Successfully Mapped: 150 (100.0%)
-- High Confidence Mappings: 145 (96.7%)
-- Low Confidence Mappings: 5 (3.3%)
-- Warnings: 0
-- Errors: 0
-
-Output Files:
-- KiCAD Library: output/Resistors.sqlite
-- Migration Report: output/migration_report.html
-- Log File: migration_20250710_193045.log
-
-Migration completed successfully in 5.2 seconds
+output_directory/
+├── components.db              # SQLite database with components
+├── components.kicad_dbl       # KiCAD database library file
+├── migration_report.json     # Detailed migration report
+└── migration.log            # Detailed log file
 ```
 
-## Step 6: Review the Migration Report
+### Database Structure
 
-Open the generated HTML report (`output/migration_report.html`) in a web browser to review the migration results. The report includes:
+The generated database contains:
 
-- Migration summary statistics
-- Component mapping details
-- Any warnings or errors encountered
-- Visualization of mapping confidence
-- Recommendations for improving results
+#### Tables
 
-## Step 7: Verify the Output
+- `components`: Main component data
+- `categories`: Component categories
 
-Examine the generated SQLite database to ensure it contains the expected data:
+#### Views
 
-```bash
-# Install sqlite3 if not already available
-# sudo apt-get install sqlite3  # For Ubuntu/Debian
+- `resistors`: Resistive components
+- `capacitors`: Capacitive components
+- `inductors`: Inductive components
+- `integrated_circuits`: IC components
+- `diodes`: Diode components
+- `transistors`: Transistor components
 
-# Open the database
-sqlite3 output/Resistors.sqlite
+#### Key Fields
 
-# List tables
-.tables
+- `symbol`: KiCAD symbol reference
+- `footprint`: KiCAD footprint reference
+- `value`: Component value
+- `description`: Component description
+- `manufacturer`: Manufacturer name
+- `mpn`: Manufacturer part number
+- `confidence`: Migration confidence score
 
-# View component count
-SELECT COUNT(*) FROM components;
+## Using in KiCAD
 
-# View component details
-SELECT * FROM component_details LIMIT 10;
-
-# Exit SQLite
-.exit
-```
-
-## Step 8: Import the Library into KiCAD
+### Installing Library
 
 1. Open KiCAD
-2. Go to Preferences > Manage Symbol Libraries
-3. Click "Add existing library to table"
-4. Select "Database Library (*.sqlite)"
-5. Browse to `output/Resistors.sqlite` and select it
-6. Give the library a nickname (e.g., "Resistors")
-7. Click OK to add the library
+2. Go to **Preferences → Manage Symbol Libraries**
+3. Select **Global Libraries** tab
+4. Click **Add Library** (folder icon)
+5. Select the generated `.kicad_dbl` file
+6. Click **OK**
 
-## Step 9: Test the Library
+### Browsing Components
 
-1. Create a new schematic in KiCAD
-2. Click the "Add Symbol" button or press 'A'
-3. Select the "Resistors" library from the list
-4. Browse or search for a resistor component
-5. Select a component and place it on the schematic
-6. Verify that the component properties match the expected values
-
-## Using the Python API
-
-Alternatively, you can perform the same migration using the Python API:
-
-```python
-from migration_tool import MigrationAPI
-
-# Initialize the API
-api = MigrationAPI()
-
-# Configure the migration
-config = {
-    'input': {
-        'path': 'path/to/resistors.DbLib',
-        'connection_timeout': 30
-    },
-    'output': {
-        'directory': 'output/',
-        'library_name': 'Resistors',
-        'format': 'sqlite',
-        'create_report': True
-    },
-    'mapping': {
-        'confidence_threshold': 0.7,
-        'use_custom_rules': True,
-        'custom_rules_path': 'custom_rules.yaml'
-    },
-    'validation': {
-        'validate_symbols': True,
-        'validate_footprints': True,
-        'report_missing': True
-    },
-    'performance': {
-        'parallel_processing': True,
-        'max_workers': 4,
-        'batch_size': 100,
-        'cache_results': True
-    }
-}
-
-# Run the migration
-result = api.run_migration(config)
-
-# Print summary
-print(f"Migration complete! {result['success_count']} components migrated successfully.")
-print(f"Output files located at: {result['output_path']}")
-```
+1. Open Schematic Editor
+2. Press **A** to add component
+3. Your migrated library appears in the list
+4. Browse and search components
+5. Components include all metadata from original database
 
 ## Troubleshooting Common Issues
 
-### Connection Issues
+### Connection Problems
 
-If you encounter connection issues:
+**Issue**: Database connection fails **Solutions**:
 
-1. Verify the DbLib file path is correct
-2. Check that the database referenced in the DbLib file is accessible
-3. Ensure you have the appropriate database drivers installed
-4. Try increasing the connection timeout
+- Install required ODBC drivers
+- Check database file permissions
+- Verify connection string in .DbLib file
+- Try read-only connection
 
-### Mapping Issues
+### Low Confidence Mappings
 
-If components aren't mapping correctly:
+**Issue**: Many components have low confidence scores **Solutions**:
 
-1. Review the custom mapping rules
-2. Adjust the confidence threshold
-3. Add more specific mapping rules for your components
-4. Check the component names and descriptions in the Altium database
+- Specify KiCAD library paths for better matching
+- Add custom mapping rules
+- Review and update component descriptions
+- Use advanced mapping algorithms
 
-### Output Issues
+### Memory Issues
 
-If the output library doesn't work in KiCAD:
+**Issue**: Migration fails with memory errors **Solutions**:
 
-1. Verify the SQLite database was created successfully
-2. Check that KiCAD can access the database file
-3. Ensure the library is properly added to KiCAD
-4. Verify that the required symbols and footprints exist in KiCAD
+- Reduce batch size: `--batch-size 500`
+- Disable caching temporarily
+- Process tables individually
+- Use 64-bit Python
+
+### Performance Issues
+
+**Issue**: Migration is very slow **Solutions**:
+
+- Enable parallel processing: `--parallel`
+- Increase thread count: `--threads 8`
+- Enable caching: `--cache`
+- Use SSD storage for better I/O
+
+## Best Practices
+
+### Before Migration
+
+1. **Backup original data**
+2. **Test with small subset** first
+3. **Check database connectivity**
+4. **Verify KiCAD library paths**
+5. **Review component descriptions** for accuracy
+
+### During Migration
+
+1. **Monitor progress** through logs
+2. **Check confidence scores** as migration proceeds
+3. **Review error messages** immediately
+4. **Use appropriate batch sizes** for your system
+
+### After Migration
+
+1. **Validate results** thoroughly
+2. **Test library in KiCAD**
+3. **Review low-confidence mappings**
+4. **Create backup** of generated database
+5. **Document custom mappings** for future use
 
 ## Next Steps
 
-After completing this basic migration, you might want to explore:
+After completing basic migration:
 
-- [Batch Processing](batch_processing.md) for handling multiple libraries
-- [Custom Mapping](custom_mapping.md) for more advanced mapping rules
-- [Enterprise Setup](enterprise_setup.md) for large-scale deployments
-- [Advanced Features](../user_guide/advanced_features.md) for optimizing the migration process
+- [Advanced Usage](advanced_usage.md): Explore ML mapping and custom rules
+- [Batch Processing](batch_processing.md): Process multiple libraries at once
+- [Custom Mapping](custom_mapping.md): Create specialized mapping rules
+- [Enterprise Setup](enterprise_setup.md): Configure for large organizations

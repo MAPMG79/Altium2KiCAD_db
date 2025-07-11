@@ -4,7 +4,9 @@ This guide provides information for developers who want to contribute to the Alt
 
 ## Code of Conduct
 
-We are committed to providing a friendly, safe, and welcoming environment for all contributors. By participating in this project, you agree to abide by our Code of Conduct:
+This project adheres to the [Contributor Covenant Code of Conduct](../../CODE_OF_CONDUCT.md). By participating, you are expected to uphold this code.
+
+Our Code of Conduct principles:
 
 - Be respectful and inclusive
 - Be patient and welcoming
@@ -16,89 +18,84 @@ We are committed to providing a friendly, safe, and welcoming environment for al
 
 ## Getting Started
 
+## Getting Started
+
 ### Prerequisites
 
 Before you begin contributing, ensure you have:
 
-1. Python 3.8 or higher
+1. Python 3.7+
 2. Git
 3. A GitHub account
-4. Familiarity with both Altium and KiCAD (for certain contributions)
+4. Virtual environment tool (venv, conda, etc.)
+5. Familiarity with both Altium and KiCAD (for certain contributions)
 
 ### Development Environment Setup
 
-1. **Fork the repository**:
-   - Visit the [GitHub repository](https://github.com/yourusername/Altium2KiCAD_db)
-   - Click the "Fork" button in the top-right corner
+```bash
+# Clone the repository
+git clone https://github.com/your-org/altium-kicad-migration.git
+cd altium-kicad-migration
 
-2. **Clone your fork**:
-   ```bash
-   git clone https://github.com/YOUR-USERNAME/Altium2KiCAD_db.git
-   cd Altium2KiCAD_db
-   ```
+# Create virtual environment
+python -m venv venv
+source venv/bin/activate  # On Windows: venv\Scripts\activate
 
-3. **Create a virtual environment**:
-   ```bash
-   python -m venv venv
-   source venv/bin/activate  # On Windows: venv\Scripts\activate
-   ```
+# Install development dependencies
+make install-dev
 
-4. **Install development dependencies**:
-   ```bash
-   pip install -e ".[dev]"
-   ```
+# Set up pre-commit hooks
+pre-commit install
 
-5. **Set up pre-commit hooks**:
-   ```bash
-   pre-commit install
-   ```
+# Run tests to verify setup
+make test
+```
 
 ### Development Workflow
 
-1. **Create a feature branch**:
-   ```bash
-   git checkout -b feature/your-feature-name
-   ```
+```bash
+# Create feature branch
+git checkout develop
+git pull origin develop
+git checkout -b feature/your-feature-name
 
-2. **Make your changes**:
-   - Write code that follows the project's style guidelines
-   - Add tests for your changes
-   - Update documentation as needed
+# Make changes and test
+make test
+make lint
+make format
 
-3. **Run tests locally**:
-   ```bash
-   pytest
-   ```
+# Commit changes
+git add .
+git commit -m "Add feature: your feature description"
 
-4. **Commit your changes**:
-   ```bash
-   git add .
-   git commit -m "Add your meaningful commit message here"
-   ```
+# Push and create pull request
+git push origin feature/your-feature-name
+```
 
-5. **Push to your fork**:
-   ```bash
-   git push origin feature/your-feature-name
-   ```
-
-6. **Create a pull request**:
-   - Go to your fork on GitHub
-   - Click "New Pull Request"
-   - Select your feature branch
-   - Add a clear description of your changes
-   - Submit the pull request
+## Contribution Guidelines
 
 ## Contribution Guidelines
 
 ### Code Style
 
-We follow these coding standards:
+We use the following tools for code quality:
 
-1. **PEP 8**: Follow the [PEP 8](https://www.python.org/dev/peps/pep-0008/) style guide for Python code.
-2. **Docstrings**: Use Google-style docstrings for all functions, classes, and methods.
-3. **Type Hints**: Include type hints for function parameters and return values.
-4. **Imports**: Sort imports using `isort` and follow the standard import order.
-5. **Line Length**: Limit lines to 88 characters (compatible with Black).
+- **Black** for code formatting
+- **isort** for import sorting
+- **flake8** for linting
+- **mypy** for type checking
+
+Run all checks with:
+
+```bash
+make lint
+```
+
+Format code with:
+
+```bash
+make format
+```
 
 Example of proper code style:
 
@@ -112,7 +109,7 @@ from migration_tool.utils.logging_utils import setup_logger
 
 
 def process_components(
-    components: List[Dict[str, any]], 
+    components: List[Dict[str, any]],
     confidence_threshold: float = 0.7,
     validate: bool = True
 ) -> List[Dict[str, any]]:
@@ -152,20 +149,44 @@ All contributions should include appropriate tests:
 1. **Unit Tests**: Test individual functions and classes
 2. **Integration Tests**: Test interactions between components
 3. **Functional Tests**: Test end-to-end workflows
-
-Run tests with:
+4. **Performance Tests**: Test performance with large datasets
 
 ```bash
 # Run all tests
-pytest
-
-# Run with coverage
-pytest --cov=migration_tool
+make test
 
 # Run specific test categories
 pytest tests/unit/
 pytest tests/integration/
-pytest tests/functional/
+pytest tests/performance/
+
+# Run with coverage
+make test-coverage
+```
+
+#### Writing Tests
+
+- Write tests for all new functionality
+- Follow existing test patterns
+- Use descriptive test names
+- Include both positive and negative test cases
+- Mock external dependencies
+
+Example test structure:
+
+```python
+def test_component_mapping_success():
+    """Test successful component mapping with valid data."""
+    # Arrange
+    component_data = {...}
+    mapper = ComponentMappingEngine()
+    
+    # Act
+    result = mapper.map_component(component_data)
+    
+    # Assert
+    assert result.confidence > 0.8
+    assert result.kicad_symbol == "Device:R"
 ```
 
 ### Documentation
@@ -176,6 +197,7 @@ Update documentation for any code changes:
 2. **README**: Update README.md if adding features or changing usage
 3. **User Guides**: Update relevant user guides for feature changes
 4. **API Documentation**: Update API docs for public interface changes
+5. **Examples**: Add or update examples demonstrating the changes
 
 Build documentation with:
 
@@ -183,6 +205,13 @@ Build documentation with:
 cd docs
 make html
 ```
+
+#### Documentation Standards
+
+- Use clear, concise language
+- Include code examples
+- Update API documentation for code changes
+- Add screenshots for UI changes
 
 ### Pull Request Process
 
@@ -192,6 +221,7 @@ make html
 4. **Update Documentation**: Update relevant documentation
 5. **Pass CI Checks**: Ensure all CI checks pass
 6. **Address Review Comments**: Be responsive to review feedback
+7. **Update Changelog**: Add your changes to the CHANGELOG.md file
 
 ## Types of Contributions
 
@@ -225,14 +255,52 @@ make html
 
 ## Advanced Topics
 
+## Advanced Topics
+
+### Performance Guidelines
+
+- Profile code for performance bottlenecks
+- Use appropriate data structures
+- Implement caching where beneficial
+- Consider memory usage for large datasets
+- Optimize database queries
+
+### Benchmarking
+
+```bash
+# Run performance benchmarks
+python scripts/performance_benchmark.py
+
+# Profile specific functions
+python -m cProfile -o profile.stats script.py
+```
+
+### Architecture Guidelines
+
+#### Design Principles
+
+- **Single Responsibility**: Each class/function has one clear purpose
+- **Dependency Injection**: Use configuration and dependency injection
+- **Error Handling**: Comprehensive error handling with recovery
+- **Logging**: Detailed logging for debugging
+- **Testability**: Design for easy testing
+
+#### Adding New Features
+
+1. **Design first**: Create design document for complex features
+2. **Interface definition**: Define clear interfaces
+3. **Implementation**: Implement with tests
+4. **Documentation**: Update relevant documentation
+5. **Examples**: Provide usage examples
+
 ### Database Schema Changes
 
-When making changes to the database schema:
+When modifying database schemas:
 
-1. **Document Changes**: Clearly document schema changes
-2. **Provide Migration Path**: Include migration scripts for existing databases
-3. **Test Thoroughly**: Test with various database sizes and contents
-4. **Consider Backward Compatibility**: Ensure changes don't break existing data
+1. **Migration scripts**: Provide upgrade/downgrade scripts
+2. **Backward compatibility**: Maintain compatibility when possible
+3. **Documentation**: Update schema documentation
+4. **Testing**: Test migration scripts thoroughly
 
 ### Adding New Database Support
 
@@ -256,32 +324,38 @@ To add a new mapping algorithm:
 
 ## Release Process
 
-Our release process follows these steps:
+### Version Numbering
 
-1. **Version Bump**: Update version in `__init__.py` and `setup.py`
-2. **Update Changelog**: Document changes in CHANGELOG.md
-3. **Create Release Branch**: Create a release branch (e.g., `release/1.2.0`)
-4. **Run Tests**: Ensure all tests pass
-5. **Build Documentation**: Update and build documentation
-6. **Create Release**: Tag the release in Git
-7. **Publish Package**: Upload to PyPI
-8. **Announce Release**: Announce the release to the community
+We use semantic versioning (MAJOR.MINOR.PATCH):
 
-## Communication Channels
+- **MAJOR**: Incompatible API changes
+- **MINOR**: New functionality (backward compatible)
+- **PATCH**: Bug fixes (backward compatible)
 
-- **GitHub Issues**: For bug reports and feature requests
-- **Pull Requests**: For code contributions
-- **Discussions**: For general questions and discussions
-- **Email**: For private inquiries (maintainer@example.com)
+### Release Checklist
 
-## Recognition
+1. Update version number
+2. Update CHANGELOG.md
+3. Run full test suite
+4. Update documentation
+5. Create release tag
+6. Publish to PyPI
+7. Update Docker images
 
-All contributors will be recognized in:
+## Community
 
-1. **CONTRIBUTORS.md**: List of all contributors
-2. **Release Notes**: Contributors to each release
-3. **Documentation**: Attribution for significant contributions
+### Communication Channels
 
-## Thank You
+- **GitHub Issues**: Bug reports and feature requests
+- **GitHub Discussions**: General discussion and questions
+- **Pull Requests**: Code contributions and reviews
 
-Thank you for considering contributing to the Altium to KiCAD Database Migration Tool! Your contributions help make this tool better for everyone in the electronics design community.
+### Recognition
+
+Contributors are recognized in:
+
+- README.md contributors section
+- Release notes
+- Documentation credits
+
+Thank you for contributing to the Altium to KiCAD Migration Tool!

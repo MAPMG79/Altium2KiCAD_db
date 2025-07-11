@@ -6,13 +6,19 @@ This guide provides detailed instructions for using the Altium to KiCAD Database
 
 The Altium to KiCAD Database Migration Tool provides both a graphical user interface (GUI) and a command-line interface (CLI). Choose the interface that best suits your workflow.
 
-### Using the Graphical Interface
+### Step 1: Launch the Application
 
-To launch the GUI:
+```bash
+python migration_app.py
+```
+
+Or if you installed via pip:
 
 ```bash
 altium2kicad --gui
 ```
+
+### Using the Graphical Interface
 
 The GUI provides a step-by-step workflow:
 
@@ -149,47 +155,74 @@ After migration completes:
 
 A successful migration will generate:
 
-- **SQLite Database**: The main KiCAD library file (e.g., `MyLibrary.sqlite`)
+- **components.db**: SQLite database containing all migrated components
+- **components.kicad_dbl**: KiCAD database library configuration file
+- **migration_report.json**: Detailed migration report with statistics
+- **migration.log**: Detailed log file of the migration process
 - **Log File**: Detailed log of the migration process (e.g., `migration_20250710_192200.log`)
 - **HTML Report**: Visual report of the migration results (e.g., `migration_report.html`)
 - **Mapping Cache**: Cache file for future migrations (e.g., `mapping_cache.json`)
 
 ### Database Structure
 
-The generated KiCAD database follows this structure:
+The generated SQLite database includes:
 
 #### Tables
 
+- `components`: Main component data
+- `categories`: Component categories (resistors, capacitors, etc.)
 - `symbols`: Symbol definitions
 - `footprints`: Footprint definitions
-- `components`: Component definitions
 - `fields`: Component field definitions
-- `categories`: Component categories
 
 #### Views
 
+- `resistors`: Filtered view of resistive components
+- `capacitors`: Filtered view of capacitive components
+- `inductors`: Filtered view of inductive components
+- `integrated_circuits`: Filtered view of ICs
+- `diodes`: Filtered view of diodes
+- `transistors`: Filtered view of transistors
 - `component_details`: Combined view of components with their fields
 - `symbol_footprint_map`: Mapping between symbols and footprints
 
 #### Key Fields
 
-- `LibRef`: Component reference designator
-- `PartNumber`: Manufacturer part number
-- `Description`: Component description
-- `SymbolRef`: Reference to symbol definition
-- `FootprintRef`: Reference to footprint definition
+- `symbol`: KiCAD symbol reference (e.g., "Device:R")
+- `footprint`: KiCAD footprint reference (e.g., "Resistor_SMD:R_0603_1608Metric")
+- `value`: Component value
+- `description`: Component description
+- `manufacturer`: Manufacturer name
+- `mpn`: Manufacturer part number
+- `datasheet`: Link to datasheet
+- `confidence`: Migration confidence score (0.0-1.0)
 
 ## Using the Migrated Library in KiCAD
 
-### Installing the Library
+### Step 1: Install in KiCAD
 
 1. Open KiCAD
-2. Go to Preferences > Manage Symbol Libraries
-3. Click "Add existing library to table"
-4. Select "Database Library (*.sqlite)"
-5. Browse to your generated SQLite file and select it
-6. Give the library a nickname (e.g., "Migrated_Components")
-7. Click OK to add the library
+2. Go to **Preferences → Manage Symbol Libraries**
+3. Click **Global Libraries** tab
+4. Click **Add Library** (folder icon)
+5. Select the generated `.kicad_dbl` file
+6. Click **OK**
+
+### Step 2: Verify Installation
+
+1. Open Schematic Editor
+2. Press **A** to add component
+3. Look for your migrated library in the list
+4. Browse components to verify successful migration
+
+### Step 3: Handle Missing Symbols/Footprints
+
+The migration tool may map some components to generic symbols or use wildcard footprints. To fix these:
+
+1. Review components with low confidence scores
+2. Create custom symbols/footprints as needed
+3. Update the database with correct references
+4. Re-import the library in KiCAD
 
 ### Browsing Components
 

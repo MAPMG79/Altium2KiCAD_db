@@ -1,52 +1,50 @@
-FROM python:3.10-slim
-
-LABEL maintainer="Altium2KiCAD Team"
-LABEL description="Altium to KiCAD Database Migration Tool"
-LABEL version="0.1.0"
+FROM python:3.9-slim
 
 # Set environment variables
-ENV PYTHONDONTWRITEBYTECODE=1 \
-    PYTHONUNBUFFERED=1 \
-    PIP_NO_CACHE_DIR=1 \
-    PIP_DISABLE_PIP_VERSION_CHECK=1 \
-    POETRY_VERSION=1.5.1
+ENV PYTHONDONTWRITEBYTECODE=1
+ENV PYTHONUNBUFFERED=1
+ENV PYTHONPATH="/app"
 
-# Set working directory
+# Set work directory
 WORKDIR /app
 
 # Install system dependencies
-RUN apt-get update && apt-get install -y --no-install-recommends \
-    build-essential \
-    libsqlite3-dev \
-    && apt-get clean \
+RUN apt-get update \
+    && apt-get install -y --no-install-recommends \
+        gcc \
+        g++ \
+        unixodbc-dev \
+        curl \
+        gnupg \
     && rm -rf /var/lib/apt/lists/*
 
-# Install Poetry
-RUN pip install "poetry==$POETRY_VERSION"
+# Install Microsoft ODBC Driver for SQL Server
+RUN curl https://packages.microsoft.com/keys/microsoft.asc | apt-key add - \
+    && curl https://packages.microsoft.com/config/debian/10/prod.list > /etc/apt/sources.list.d/mssql-release.list \
+    && apt-get update \
+    && ACCEPT_EULA=Y apt-get install -y msodbcsql17 \
+    && rm -rf /var/lib/apt/lists/*
 
-# Copy poetry configuration files
-COPY pyproject.toml poetry.lock* ./
+# Copy requirements and install Python dependencies
+COPY requirements.txt .
+RUN pip install --no-cache-dir -r requirements.txt
 
-# Configure poetry to not use a virtual environment in the container
-RUN poetry config virtualenvs.create false
-
-# Install dependencies
-RUN poetry install --no-dev --no-interaction --no-ansi
-
-# Copy the rest of the application
+# Copy application code
 COPY . .
 
-# Make scripts executable
-RUN chmod +x scripts/*.py
+# Install the package
+RUN pip install -e .
 
-# Create volume for data persistence
-VOLUME /app/data
+# Create non-root user
+RUN adduser --disabled-password --gecos '' appuser \
+    && chown -R appuser:appuser /app
+USER appuser
 
-# Expose port for GUI (if applicable)
+# Create directories for data
+RUN mkdir -p /app/data /app/output /app/logs
+
+# Expose port for web interface (if implemented)
 EXPOSE 8080
 
-# Set entrypoint to the CLI
-ENTRYPOINT ["python", "-m", "migration_tool.cli"]
-
-# Default command (can be overridden)
-CMD ["--help"]
+# Default command
+CMD ["python", "-m", "migration_tool.cli", "--help"]

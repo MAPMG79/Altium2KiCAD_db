@@ -13,12 +13,16 @@ A comprehensive tool for migrating component libraries from Altium's DbLib forma
 - **Intelligent Mapping**: Map Altium components to KiCAD equivalents with confidence scoring
 - **Symbol & Footprint Mapping**: Automatically map Altium symbols and footprints to KiCAD equivalents
 - **Custom Mapping Rules**: Define custom mapping rules for specialized components
+- **ML-Based Mapping**: Advanced machine learning algorithms for improved mapping accuracy
 - **Batch Processing**: Process multiple libraries in a single operation
 - **Validation**: Validate mappings against KiCAD libraries
 - **Detailed Reporting**: Generate comprehensive reports of the migration process
 - **Multiple Interfaces**: Command-line, graphical user interface, and API server
 - **Extensible Architecture**: Easily extend with new database support or mapping algorithms
 - **Performance Optimized**: Parallel processing and caching for handling large libraries
+- **Comprehensive Error Handling**: Advanced error recovery and reporting system
+- **Monitoring & Metrics**: Prometheus and Grafana integration for performance monitoring
+- **Testing Framework**: Sophisticated sample data generation for comprehensive testing
 
 ## 📋 Requirements
 
@@ -115,6 +119,9 @@ Comprehensive documentation is available at [https://altium2kicad-db.readthedocs
 - [Architecture](https://altium2kicad-db.readthedocs.io/en/latest/developer_guide/architecture.html)
 - [API Reference](https://altium2kicad-db.readthedocs.io/en/latest/developer_guide/api_reference.html)
 - [Extending the Tool](https://altium2kicad-db.readthedocs.io/en/latest/developer_guide/extending.html)
+- [Error Handling](https://altium2kicad-db.readthedocs.io/en/latest/developer_guide/error_handling.html)
+- [Testing Framework](https://altium2kicad-db.readthedocs.io/en/latest/developer_guide/testing.html)
+- [Monitoring & Metrics](https://altium2kicad-db.readthedocs.io/en/latest/developer_guide/monitoring.html)
 - [Contributing](https://altium2kicad-db.readthedocs.io/en/latest/developer_guide/contributing.html)
 
 ### Examples
@@ -144,6 +151,12 @@ migration:
   validate_symbols: false
   batch_size: 1000
   min_confidence: 50
+  use_optimized_engine: true
+  parallel_processing: true
+  enable_caching: true
+  enable_ml_mapping: true
+  ml_model_path: "models/symbol_classifier.pkl"
+  ml_fallback_threshold: 0.6
 ```
 
 ## 🛠️ Development

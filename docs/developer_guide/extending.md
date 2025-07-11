@@ -298,6 +298,355 @@ class EnhancedMappingEngine(MappingEngine):
 
 ### Using the Custom Mapper
 
+To use the custom mapper in your application:
+
+```python
+from migration_tool.core.mapping_engine import get_mapping_engine
+from custom_mappers import EnhancedMappingEngine
+
+# Register the enhanced mapping engine
+get_mapping_engine.register("ml_enhanced")(EnhancedMappingEngine)
+
+# Use the enhanced mapping engine
+config_manager = ConfigManager("config.yaml")
+mapping_engine = get_mapping_engine("ml_enhanced")(config_manager)
+
+# Perform mapping
+results = mapping_engine.map_components(components)
+```
+
+## Advanced ML-Based Mapping Capabilities
+
+The Altium to KiCAD Database Migration Tool supports advanced machine learning techniques for component mapping. This section describes how to implement and use these capabilities.
+
+### ML-Based Mapping Architecture
+
+The ML-based mapping system consists of several components:
+
+1. **Feature Extraction**: Converting component data into feature vectors
+2. **Model Training**: Training ML models on labeled data
+3. **Prediction**: Using trained models to predict mappings
+4. **Confidence Scoring**: Assessing the reliability of predictions
+5. **Fallback Mechanisms**: Handling cases where ML predictions are uncertain
+
+### Implementing a Comprehensive ML Mapper
+
+Here's an example of a more comprehensive ML-based mapper:
+
+```python
+from migration_tool.core.mapping_engine import SymbolMapper
+from migration_tool.utils.logging_utils import setup_logger
+import numpy as np
+import pandas as pd
+from sklearn.ensemble import RandomForestClassifier
+from sklearn.feature_extraction.text import TfidfVectorizer
+
+class AdvancedMLSymbolMapper(SymbolMapper):
+    """
+    Advanced symbol mapper using multiple ML techniques.
+    """
+    
+    def __init__(self, config, logger=None):
+        """Initialize the advanced ML mapper."""
+        super().__init__(config, logger)
+        self.logger = logger or setup_logger(__name__)
+        
+        # Initialize models
+        self.text_vectorizer = None
+        self.classifier = None
+        self.fallback_threshold = config.get('ml_fallback_threshold', 0.6)
+        
+        # Load models
+        self._load_models()
+        
+    def _load_models(self):
+        """Load ML models and vectorizers."""
+        try:
+            import joblib
+            
+            # Load text vectorizer
+            vectorizer_path = self.config.get('ml_vectorizer_path', 'models/tfidf_vectorizer.pkl')
+            self.logger.info(f"Loading text vectorizer from {vectorizer_path}")
+            self.text_vectorizer = joblib.load(vectorizer_path)
+            
+            # Load classifier
+            model_path = self.config.get('ml_model_path', 'models/symbol_classifier.pkl')
+            self.logger.info(f"Loading classifier from {model_path}")
+            self.classifier = joblib.load(model_path)
+            
+            self.logger.info("ML models loaded successfully")
+            
+        except Exception as e:
+            self.logger.warning(f"Failed to load ML models: {str(e)}. Falling back to rule-based mapping.")
+            self.text_vectorizer = None
+            self.classifier = None
+    
+    def map_symbol(self, component):
+        """Map an Altium symbol to a KiCAD symbol using ML techniques."""
+        # If models failed to load, fall back to parent implementation
+        if self.text_vectorizer is None or self.classifier is None:
+            return super().map_symbol(component)
+        
+        try:
+            # Extract text features
+            text_features = self._extract_text_features(component)
+            
+            # Extract numerical features
+            numerical_features = self._extract_numerical_features(component)
+            
+            # Combine features
+            combined_features = self._combine_features(text_features, numerical_features)
+            
+            # Get predictions and probabilities
+            predictions = self.classifier.predict([combined_features])[0]
+            probabilities = self.classifier.predict_proba([combined_features])[0]
+            
+            # Get the highest probability and corresponding symbol
+            max_prob_idx = np.argmax(probabilities)
+            confidence = probabilities[max_prob_idx]
+            symbol_name = self.classifier.classes_[max_prob_idx]
+            
+            self.logger.debug(f"ML mapped '{component.get('LibRef')}' to '{symbol_name}' with confidence {confidence:.2f}")
+            
+            # If confidence is below threshold, fall back to rule-based mapping
+            if confidence < self.fallback_threshold:
+                self.logger.debug(f"Confidence {confidence:.2f} below threshold {self.fallback_threshold}, falling back to rule-based mapping")
+                return super().map_symbol(component)
+            
+            return symbol_name, float(confidence)
+            
+        except Exception as e:
+            self.logger.error(f"ML mapping failed: {str(e)}. Falling back to rule-based mapping.")
+            return super().map_symbol(component)
+    
+    def _extract_text_features(self, component):
+        """Extract text features from component."""
+        # Combine relevant text fields
+        text = " ".join([
+            component.get('LibRef', ''),
+            component.get('Description', ''),
+            component.get('Comment', ''),
+            component.get('Value', '')
+        ])
+        
+        # Transform text using vectorizer
+        if text.strip():
+            return self.text_vectorizer.transform([text]).toarray()[0]
+        else:
+            return np.zeros(self.text_vectorizer.get_feature_names_out().shape[0])
+    
+    def _extract_numerical_features(self, component):
+        """Extract numerical features from component."""
+        features = []
+        
+        # Component type indicators (one-hot encoding)
+        features.append(1 if 'resistor' in component.get('Description', '').lower() else 0)
+        features.append(1 if 'capacitor' in component.get('Description', '').lower() else 0)
+        features.append(1 if 'inductor' in component.get('Description', '').lower() else 0)
+        features.append(1 if 'diode' in component.get('Description', '').lower() else 0)
+        features.append(1 if 'transistor' in component.get('Description', '').lower() else 0)
+        features.append(1 if 'ic' in component.get('Description', '').lower() else 0)
+        
+        # Pin count (if available)
+        pin_count = 0
+        try:
+            pin_count_str = component.get('PinCount', '0')
+            pin_count = int(pin_count_str)
+        except (ValueError, TypeError):
+            pass
+        features.append(pin_count)
+        
+        return np.array(features)
+    
+    def _combine_features(self, text_features, numerical_features):
+        """Combine text and numerical features."""
+        return np.concatenate([text_features, numerical_features])
+```
+
+### Training ML Models for Component Mapping
+
+To train ML models for component mapping:
+
+```python
+import pandas as pd
+import numpy as np
+from sklearn.feature_extraction.text import TfidfVectorizer
+from sklearn.ensemble import RandomForestClassifier
+from sklearn.model_selection import train_test_split
+from sklearn.metrics import classification_report
+import joblib
+
+def train_ml_models(training_data_path, output_dir):
+    """
+    Train ML models for component mapping.
+    
+    Args:
+        training_data_path: Path to training data CSV
+        output_dir: Directory to save models
+    """
+    # Load training data
+    data = pd.read_csv(training_data_path)
+    
+    # Prepare text data
+    text_data = data['Description'] + ' ' + data['LibRef'] + ' ' + data['Comment']
+    
+    # Create and fit vectorizer
+    vectorizer = TfidfVectorizer(max_features=1000)
+    text_features = vectorizer.fit_transform(text_data)
+    
+    # Prepare numerical features
+    numerical_features = np.column_stack([
+        data['PinCount'].fillna(0),
+        # Add more numerical features...
+    ])
+    
+    # Combine features
+    features = np.hstack([
+        text_features.toarray(),
+        numerical_features
+    ])
+    
+    # Prepare target
+    target = data['KiCadSymbol']
+    
+    # Split data
+    X_train, X_test, y_train, y_test = train_test_split(
+        features, target, test_size=0.2, random_state=42
+    )
+    
+    # Train classifier
+    classifier = RandomForestClassifier(n_estimators=100, random_state=42)
+    classifier.fit(X_train, y_train)
+    
+    # Evaluate
+    y_pred = classifier.predict(X_test)
+    print(classification_report(y_test, y_pred))
+    
+    # Save models
+    joblib.dump(vectorizer, f"{output_dir}/tfidf_vectorizer.pkl")
+    joblib.dump(classifier, f"{output_dir}/symbol_classifier.pkl")
+    
+    print(f"Models saved to {output_dir}")
+```
+
+### Benchmarking ML Mapping Performance
+
+The tool includes benchmarking capabilities to evaluate ML mapping performance:
+
+```python
+def benchmark_ml_mapper(test_data_path, models_dir):
+    """
+    Benchmark ML mapper performance.
+    
+    Args:
+        test_data_path: Path to test data
+        models_dir: Directory containing ML models
+    """
+    # Load test data
+    test_data = pd.read_csv(test_data_path)
+    
+    # Create mappers
+    rule_based_mapper = SymbolMapper(config={})
+    ml_mapper = AdvancedMLSymbolMapper(config={
+        'ml_vectorizer_path': f"{models_dir}/tfidf_vectorizer.pkl",
+        'ml_model_path': f"{models_dir}/symbol_classifier.pkl",
+        'ml_fallback_threshold': 0.6
+    })
+    
+    # Benchmark results
+    results = {
+        'rule_based': {'correct': 0, 'total': 0, 'time': 0},
+        'ml_based': {'correct': 0, 'total': 0, 'time': 0}
+    }
+    
+    # Run benchmark
+    for _, row in test_data.iterrows():
+        component = row.to_dict()
+        expected_symbol = component['KiCadSymbol']
+        
+        # Test rule-based mapper
+        start_time = time.time()
+        rule_symbol, rule_confidence = rule_based_mapper.map_symbol(component)
+        rule_time = time.time() - start_time
+        
+        results['rule_based']['total'] += 1
+        results['rule_based']['time'] += rule_time
+        if rule_symbol == expected_symbol:
+            results['rule_based']['correct'] += 1
+        
+        # Test ML-based mapper
+        start_time = time.time()
+        ml_symbol, ml_confidence = ml_mapper.map_symbol(component)
+        ml_time = time.time() - start_time
+        
+        results['ml_based']['total'] += 1
+        results['ml_based']['time'] += ml_time
+        if ml_symbol == expected_symbol:
+            results['ml_based']['correct'] += 1
+    
+    # Calculate metrics
+    for mapper_type in results:
+        results[mapper_type]['accuracy'] = results[mapper_type]['correct'] / results[mapper_type]['total']
+        results[mapper_type]['avg_time'] = results[mapper_type]['time'] / results[mapper_type]['total']
+    
+    return results
+```
+
+### Deployment Automation
+
+To automate the deployment of ML models:
+
+```python
+def deploy_ml_models(models_dir, target_dir):
+    """
+    Deploy ML models to target directory.
+    
+    Args:
+        models_dir: Source directory containing trained models
+        target_dir: Target directory for deployment
+    """
+    import shutil
+    import os
+    
+    # Create target directory if it doesn't exist
+    os.makedirs(target_dir, exist_ok=True)
+    
+    # Copy model files
+    for model_file in ['tfidf_vectorizer.pkl', 'symbol_classifier.pkl']:
+        source_path = os.path.join(models_dir, model_file)
+        target_path = os.path.join(target_dir, model_file)
+        
+        if os.path.exists(source_path):
+            shutil.copy2(source_path, target_path)
+            print(f"Deployed {model_file} to {target_path}")
+        else:
+            print(f"Warning: {source_path} not found")
+```
+
+### Implementation Guide
+
+To implement ML-based mapping in your project:
+
+1. **Collect Training Data**: Gather a dataset of Altium components with known KiCAD mappings
+2. **Prepare Features**: Extract relevant features from component data
+3. **Train Models**: Train ML models using the provided functions
+4. **Deploy Models**: Deploy the trained models to your project
+5. **Implement Mapper**: Create a custom mapper class that uses the models
+6. **Integrate with Engine**: Integrate your mapper with the mapping engine
+7. **Monitor Performance**: Track mapping accuracy and performance metrics
+
+### Architecture Overview
+
+The ML-based mapping architecture follows these principles:
+
+1. **Modularity**: ML components are modular and can be replaced or upgraded
+2. **Fallback Mechanisms**: ML mappers fall back to rule-based mapping when confidence is low
+3. **Feature Engineering**: Comprehensive feature extraction for optimal performance
+4. **Model Versioning**: Support for versioning and updating ML models
+5. **Performance Monitoring**: Tracking of mapping accuracy and performance
+
+By implementing these advanced ML-based mapping capabilities, you can significantly improve the accuracy and reliability of component mapping in the Altium to KiCAD Database Migration Tool.
+
 Users can then use your custom mapper by specifying it in their configuration:
 
 ```yaml

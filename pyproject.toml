@@ -1,21 +1,23 @@
 [build-system]
-requires = ["setuptools>=42", "wheel"]
+requires = ["setuptools>=45", "wheel", "setuptools_scm[toml]>=6.2"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "altium2kicad"
-version = "1.0.0"
-description = "A tool for migrating Altium database libraries to KiCAD format"
+name = "altium-kicad-migration"
+dynamic = ["version"]
+description = "A comprehensive tool for migrating component databases from Altium Designer to KiCAD"
 readme = "README.md"
-requires-python = ">=3.7"
-license = {text = "MIT"}
+license = {file = "LICENSE"}
 authors = [
-    {name = "Altium2KiCAD Team", email = "support@migration-tool.com"}
+    {name = "Migration Tool Team", email = "support@migration-tool.com"},
+]
+maintainers = [
+    {name = "Migration Tool Team", email = "support@migration-tool.com"},
 ]
 classifiers = [
     "Development Status :: 4 - Beta",
     "Intended Audience :: Developers",
-    "Intended Audience :: Science/Research",
+    "Topic :: Scientific/Engineering :: Electronic Design Automation (EDA)",
     "License :: OSI Approved :: MIT License",
     "Programming Language :: Python :: 3",
     "Programming Language :: Python :: 3.7",
@@ -23,67 +25,57 @@ classifiers = [
     "Programming Language :: Python :: 3.9",
     "Programming Language :: Python :: 3.10",
     "Programming Language :: Python :: 3.11",
-    "Topic :: Scientific/Engineering :: Electronic Design Automation (EDA)",
 ]
+requires-python = ">=3.7"
 dependencies = [
-    "configparser>=5.0.0",
     "pyodbc>=4.0.30",
-    "pyyaml>=6.0",
-    "tqdm>=4.62.0",
-    "sqlalchemy>=1.4.0",
-    "click>=8.0.0",
-    "tkinter-tooltip>=0.2.0",
-    "requests>=2.25.0",
+    "pyyaml>=5.4.0",
+    "psutil>=5.8.0",
 ]
 
 [project.optional-dependencies]
-dev = [
-    "pytest>=6.0.0",
-    "pytest-cov>=2.12.0",
-    "black>=22.12.0",
-    "isort>=5.12.0",
-    "flake8>=6.0.0",
-    "flake8-docstrings>=1.6.0",
-    "mypy>=0.991",
-    "types-PyYAML",
-    "types-requests",
-    "pre-commit>=2.20.0",
-    "build>=0.8.0",
-    "twine>=4.0.0",
-]
-gui = [
-    "pillow>=9.0.0",
-    "customtkinter>=5.0.0",
-]
 ml = [
     "scikit-learn>=1.0.0",
+    "pandas>=1.3.0",
     "numpy>=1.20.0",
 ]
-
-[project.urls]
-"Homepage" = "https://github.com/your-org/altium-kicad-migration"
-"Bug Tracker" = "https://github.com/your-org/altium-kicad-migration/issues"
-"Documentation" = "https://altium-kicad-migration.readthedocs.io/"
+gui = [
+    "pillow>=8.0.0",
+]
+dev = [
+    "pytest>=6.0.0",
+    "pytest-cov>=2.0.0",
+    "black>=21.0.0",
+    "flake8>=3.8.0",
+    "mypy>=0.800",
+]
 
 [project.scripts]
-altium2kicad = "migration_tool.cli:main"
-altium2kicad-gui = "migration_tool.gui:main"
-altium2kicad-api = "migration_tool.api:start_api_server"
+altium-kicad-migrate = "migration_tool.cli:main"
+migration-gui = "migration_tool.gui:main"
+
+[project.urls]
+Homepage = "https://github.com/your-org/altium-kicad-migration"
+Repository = "https://github.com/your-org/altium-kicad-migration.git"
+Issues = "https://github.com/your-org/altium-kicad-migration/issues"
+Documentation = "https://github.com/your-org/altium-kicad-migration/wiki"
+
+[tool.setuptools_scm]
+write_to = "migration_tool/_version.py"
 
 [tool.black]
 line-length = 88
-target-version = ['py37', 'py38', 'py39', 'py310']
+target-version = ['py37', 'py38', 'py39', 'py310', 'py311']
 include = '\.pyi?$'
-exclude = '''
+extend-exclude = '''
 /(
-    \.eggs
+  # directories
+  \.eggs
   | \.git
   | \.hg
   | \.mypy_cache
   | \.tox
   | \.venv
-  | _build
-  | buck-out
   | build
   | dist
 )/
@@ -92,6 +84,8 @@ exclude = '''
 [tool.isort]
 profile = "black"
 multi_line_output = 3
+line_length = 88
+known_first_party = ["migration_tool"]
 
 [tool.mypy]
 python_version = "3.7"
@@ -99,23 +93,44 @@ warn_return_any = true
 warn_unused_configs = true
 disallow_untyped_defs = true
 disallow_incomplete_defs = true
-
-[[tool.mypy.overrides]]
-module = "tests.*"
-disallow_untyped_defs = false
-disallow_incomplete_defs = false
+check_untyped_defs = true
+disallow_untyped_decorators = true
+no_implicit_optional = true
+warn_redundant_casts = true
+warn_unused_ignores = true
+warn_no_return = true
+warn_unreachable = true
+strict_equality = true
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
-python_files = "test_*.py"
-python_functions = "test_*"
-python_classes = "Test*"
-addopts = "--cov=migration_tool --cov-report=term-missing"
+python_files = ["test_*.py", "*_test.py"]
+python_functions = ["test_*"]
+addopts = [
+    "-ra",
+    "--strict-markers",
+    "--strict-config",
+    "--cov=migration_tool",
+    "--cov-report=term-missing",
+    "--cov-report=html",
+    "--cov-report=xml",
+]
+markers = [
+    "slow: marks tests as slow (deselect with '-m \"not slow\"')",
+    "integration: marks tests as integration tests",
+    "unit: marks tests as unit tests",
+]
+filterwarnings = [
+    "error",
+    "ignore::UserWarning",
+    "ignore::DeprecationWarning",
+]
 
 [tool.coverage.run]
 source = ["migration_tool"]
 omit = [
-    "tests/*",
+    "*/tests/*",
+    "*/test_*",
     "setup.py",
 ]
 
