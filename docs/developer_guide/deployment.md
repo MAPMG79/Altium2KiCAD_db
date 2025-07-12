@@ -199,9 +199,13 @@ services:
 
 The project uses GitHub Actions for continuous integration and deployment, ensuring code quality and automating the release process.
 
-### GitHub Actions Workflow
+### GitHub Actions Workflows
 
-The CI/CD pipeline is defined in `.github/workflows/ci.yml`:
+The project uses multiple GitHub Actions workflows for different purposes:
+
+#### 1. Continuous Integration (`.github/workflows/ci.yml`)
+
+The main CI workflow handles testing across multiple platforms and Python versions:
 
 ```yaml
 name: CI/CD
@@ -211,8 +215,6 @@ on:
     branches: [ main, develop ]
   pull_request:
     branches: [ main ]
-  release:
-    types: [ published ]
 
 jobs:
   test:
@@ -221,124 +223,69 @@ jobs:
       matrix:
         os: [ubuntu-latest, windows-latest, macos-latest]
         python-version: ['3.7', '3.8', '3.9', '3.10', '3.11']
-        exclude:
-          # Exclude some combinations to reduce matrix size
-          - os: macos-latest
-            python-version: '3.7'
-          - os: windows-latest
-            python-version: '3.7'
-
     steps:
-    - uses: actions/checkout@v3
-      with:
-        fetch-depth: 0
+    # Testing, linting, and coverage steps
+```
 
-    - name: Set up Python ${{ matrix.python-version }}
-      uses: actions/setup-python@v4
-      with:
-        python-version: ${{ matrix.python-version }}
+#### 2. Release Management (`.github/workflows/release.yml`)
 
-    - name: Install system dependencies (Ubuntu)
-      if: matrix.os == 'ubuntu-latest'
-      run: |
-        sudo apt-get update
-        sudo apt-get install -y unixodbc-dev
+Handles package building and publishing when releases are created:
 
-    - name: Install system dependencies (macOS)
-      if: matrix.os == 'macos-latest'
-      run: |
-        brew install unixodbc
+```yaml
+name: Release
 
-    - name: Install Python dependencies
-      run: |
-        python -m pip install --upgrade pip
-        pip install -e .[dev]
+on:
+  release:
+    types: [published]
 
-    - name: Lint with flake8
-      run: |
-        flake8 migration_tool tests
+jobs:
+  build-and-publish:
+    # Builds and publishes to PyPI
+  build-docker:
+    # Builds and pushes Docker images
+```
 
-    - name: Check formatting with black
-      run: |
-        black --check migration_tool tests
+#### 3. Documentation (`.github/workflows/docs.yml`)
 
-    - name: Type check with mypy
-      run: |
-        mypy migration_tool
+Builds and deploys project documentation:
 
-    - name: Test with pytest
-      run: |
-        pytest tests/ -v --cov=migration_tool --cov-report=xml
+```yaml
+name: Documentation
 
-    - name: Upload coverage to Codecov
-      uses: codecov/codecov-action@v3
-      with:
-        file: ./coverage.xml
-        flags: unittests
-        name: codecov-umbrella
+on:
+  push:
+    branches: [ main ]
+    paths:
+      - 'docs/**'
+      - 'migration_tool/**'
 
-  build:
-    needs: test
-    runs-on: ubuntu-latest
-    if: github.event_name == 'release'
+jobs:
+  build-docs:
+    # Builds Sphinx documentation
+  deploy-docs:
+    # Deploys to GitHub Pages
+```
 
-    steps:
-    - uses: actions/checkout@v3
-      with:
-        fetch-depth: 0
+#### 4. Library Migration (`.github/workflows/migrate-libraries.yml`)
 
-    - name: Set up Python
-      uses: actions/setup-python@v4
-      with:
-        python-version: '3.9'
+Automated migration of component libraries:
 
-    - name: Install build dependencies
-      run: |
-        python -m pip install --upgrade pip
-        pip install build twine
+```yaml
+name: Migrate Component Libraries
 
-    - name: Build package
-      run: |
-        python -m build
+on:
+  push:
+    paths:
+      - 'altium_libraries/**'
+  workflow_dispatch:
 
-    - name: Publish to PyPI
-      env:
-        TWINE_USERNAME: __token__
-        TWINE_PASSWORD: ${{ secrets.PYPI_API_TOKEN }}
-      run: |
-        twine upload dist/*
-
-  docker:
-    needs: test
-    runs-on: ubuntu-latest
-    if: github.event_name == 'release'
-
-    steps:
-    - uses: actions/checkout@v3
-
-    - name: Set up Docker Buildx
-      uses: docker/setup-buildx-action@v2
-
-    - name: Log in to Docker Hub
-      uses: docker/login-action@v2
-      with:
-        username: ${{ secrets.DOCKER_USERNAME }}
-        password: ${{ secrets.DOCKER_PASSWORD }}
-
-    - name: Extract metadata
-      id: meta
-      uses: docker/metadata-action@v4
-      with:
-        images: your-org/altium-kicad-migration
-
-    - name: Build and push Docker image
-      uses: docker/build-push-action@v4
-      with:
-        context: .
-        platforms: linux/amd64,linux/arm64
-        push: true
-        tags: ${{ steps.meta.outputs.tags }}
-        labels: ${{ steps.meta.outputs.labels }}
+jobs:
+  migrate:
+    # Runs migration tool
+  test_libraries:
+    # Validates migrated libraries
+  publish_libraries:
+    # Commits and releases libraries
 ```
 
 ### Quality Checks
