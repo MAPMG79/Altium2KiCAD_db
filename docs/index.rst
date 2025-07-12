@@ -43,6 +43,7 @@ Features
 
    installation
    usage
+   building_docs
 
 .. toctree::
    :maxdepth: 2
@@ -73,6 +74,7 @@ Features
    developer_guide/integration
    developer_guide/deployment
    developer_guide/contributing
+   building_docs
 
 .. toctree::
    :maxdepth: 2
