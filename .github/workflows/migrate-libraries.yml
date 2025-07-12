@@ -43,13 +43,13 @@ jobs:
                      --generate-report
     
     - name: Upload KiCAD libraries
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: kicad-libraries
         path: kicad_libraries/
     
     - name: Upload migration report
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: migration-report
         path: migration_report.html
@@ -61,7 +61,7 @@ jobs:
       - uses: actions/checkout@v4
       
       - name: Download KiCAD libraries
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v4
         with:
           name: kicad-libraries
           path: kicad_libraries/
@@ -87,7 +87,7 @@ jobs:
       - uses: actions/checkout@v4
       
       - name: Download KiCAD libraries
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v4
         with:
           name: kicad-libraries
           path: kicad_libraries/
